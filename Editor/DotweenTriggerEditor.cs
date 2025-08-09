@@ -1,3 +1,4 @@
+#if DOTWEEN
 using System;
 using LK.Runtime.Utility;
 using UnityEditor;
@@ -241,3 +242,4 @@ namespace LK.Editor
         }
     }
 }
+#endif
