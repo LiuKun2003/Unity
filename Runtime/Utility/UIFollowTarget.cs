@@ -19,7 +19,7 @@ namespace LK.Runtime.Utility
         protected override void Reset()
         {
             base.Reset();
-            _canvas = transform.GetComponentInParent<Canvas>();
+            CacheCanvas();
             activeCameraInScreenSpaceOverlay = Camera.main;
         }
 #endif
