@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace LK.Runtime.Utility
 {
-    public class PageTurnButton : Selectable, IPointerClickHandler, ISubmitHandler
+    public class PageTurnButton : SimpleOverrideButton
     {
         public enum TurnBehavior
         {
@@ -58,25 +58,6 @@ namespace LK.Runtime.Utility
             }
         }
         
-        public virtual void OnPointerClick(PointerEventData eventData)
-        {
-            if (eventData.button != PointerEventData.InputButton.Left)
-                return;
-
-            Turn();
-        }
-
-        public virtual void OnSubmit(BaseEventData eventData)
-        {
-            Turn();
-            
-            if (!IsActive() || !IsInteractable())
-                return;
-
-            DoStateTransition(SelectionState.Pressed, false);
-            StartCoroutine(OnFinishSubmit());
-        }
-        
         protected override void OnEnable()
         {
             base.OnEnable();
@@ -105,13 +86,13 @@ namespace LK.Runtime.Utility
             };
         }
         
-        private void Turn()
+        protected override void Click()
         {
-            if (!IsActive() || !IsInteractable() || multiPage == null)
+            if (multiPage == null)
+            {
                 return;
+            }
 
-            UISystemProfilerApi.AddMarker("Button.onClick", this);
-            
             switch (turningType)
             {
                 case TurnBehavior.None:
@@ -126,25 +107,11 @@ namespace LK.Runtime.Utility
                     multiPage.FirstPage();
                     break;
                 case TurnBehavior.Trailer:
-                    multiPage.TrailerPage();
+                    multiPage.TrailerPage(); 
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-        }
-        
-        private IEnumerator OnFinishSubmit()
-        {
-            var fadeTime = colors.fadeDuration;
-            var elapsedTime = 0f;
-
-            while (elapsedTime < fadeTime)
-            {
-                elapsedTime += Time.unscaledDeltaTime;
-                yield return null;
-            }
-
-            DoStateTransition(currentSelectionState, false);
         }
     }
 }
