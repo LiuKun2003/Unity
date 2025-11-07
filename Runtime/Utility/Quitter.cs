@@ -1,3 +1,5 @@
+using System;
+using System.Collections;
 using UnityEngine;
 
 namespace LK.Runtime.Utility
@@ -11,7 +13,13 @@ namespace LK.Runtime.Utility
         
         public void QuitDelayed(float delay)
         {
-            Executing.Delayed(QuitApplication, delay);
+            StartCoroutine(Delayed(delay));
+        }
+
+        private static IEnumerator Delayed(float delay)
+        {
+            yield return new WaitForSeconds(delay);
+            QuitApplication();
         }
         
         private static void QuitApplication()
