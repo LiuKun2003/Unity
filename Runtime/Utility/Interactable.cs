@@ -2,6 +2,7 @@ using UnityEngine;
 
 namespace LK.Runtime.Utility
 {
+    [RequireComponent(typeof(Collider))]
     public class Interactable : MonoBehaviour
     {
         [SerializeField] private float zoomSpeed = 1f;
