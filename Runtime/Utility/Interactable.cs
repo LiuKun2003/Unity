@@ -29,12 +29,14 @@ namespace LK.Runtime.Utility
 
         private void OnMouseDrag()
         {
+            if (!enabled) return;
             _targetRotation.x += Input.GetAxisRaw("Mouse Y") * rotationSpeed;
             _targetRotation.y -= Input.GetAxisRaw("Mouse X") * rotationSpeed;
         }
 
         private void OnMouseOver()
         {
+            if (!enabled) return;
             _targetScale += Input.GetAxisRaw("Mouse ScrollWheel") * zoomSpeed;
             _targetScale = Mathf.Clamp(_targetScale, zoomMinLimit, zoomMaxLimit);
         }

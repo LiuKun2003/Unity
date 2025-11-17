@@ -7,7 +7,6 @@ namespace LK.Editor
     public class RenderTextureToPNG : EditorWindow
     {
         private RenderTexture _renderTexture;
-        private string _savePath;
 
         [MenuItem("Tools/RenderTexture To PNG")]
         public static void ShowWindow()
@@ -29,7 +28,7 @@ namespace LK.Editor
             if (GUILayout.Button("Generate PNG"))
             {
                 // 弹出文件保存对话框
-                _savePath = EditorUtility.SaveFilePanel("Save PNG", "", "RenderTexture", "png");
+                var _savePath = EditorUtility.SaveFilePanel("Save PNG", "", "RenderTexture", "png");
                 if (!string.IsNullOrEmpty(_savePath))
                 {
                     // 调用保存方法
