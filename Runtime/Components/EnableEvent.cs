@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace LK.Runtime.Utility
+namespace LK.Runtime.Components
 {
     /// <summary>
     /// 在游戏对象启用/禁用时触发事件的组件

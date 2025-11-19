@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace LK.Runtime.Utility
+namespace LK.Runtime.Components
 {
     public class MultiPage : MonoBehaviour
     {

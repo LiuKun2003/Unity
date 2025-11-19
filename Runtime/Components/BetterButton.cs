@@ -1,9 +1,8 @@
-using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-namespace LK.Runtime.Utility
+namespace LK.Runtime.Components
 {
     [AddComponentMenu("UI/Effects/BetterButton", 83)]
     [RequireComponent(typeof(Selectable))]

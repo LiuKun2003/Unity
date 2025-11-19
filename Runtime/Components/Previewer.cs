@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace LK.Runtime.Utility
+namespace LK.Runtime.Components
 {
     public class Previewer : UIBehaviour, IDragHandler, IScrollHandler
     {

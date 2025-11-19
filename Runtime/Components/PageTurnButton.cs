@@ -1,10 +1,7 @@
 using System;
-using System.Collections;
 using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.UI;
 
-namespace LK.Runtime.Utility
+namespace LK.Runtime.Components
 {
     public class PageTurnButton : SimpleOverrideButton
     {

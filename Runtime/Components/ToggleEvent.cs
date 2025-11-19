@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
-namespace LK.Runtime.Utility
+namespace LK.Runtime.Components
 {
     [RequireComponent(typeof(Toggle))]
     public class ToggleEvent : MonoBehaviour

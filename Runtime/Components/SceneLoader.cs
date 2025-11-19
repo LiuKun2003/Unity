@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace LK.Runtime.Utility
+namespace LK.Runtime.Components
 {
     public class SceneLoader : MonoBehaviour
     {

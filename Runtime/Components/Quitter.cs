@@ -1,8 +1,7 @@
-using System;
 using System.Collections;
 using UnityEngine;
 
-namespace LK.Runtime.Utility
+namespace LK.Runtime.Components
 {
     public class Quitter : MonoBehaviour
     {
