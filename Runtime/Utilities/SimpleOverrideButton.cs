@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-namespace LK.Runtime.Components
+namespace LK.Runtime.Utilities
 {
     public class SimpleOverrideButton : Selectable, IPointerClickHandler, ISubmitHandler
     {
