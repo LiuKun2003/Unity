@@ -24,6 +24,7 @@ namespace LK.Runtime.Components
         private Vector3 _startPosition;
         private Vector3 _startRotation;
         private float _startScale;
+        private bool _startInfoInitialized;
 
         private Vector3 _positionVelocity;
         private Vector3 _rotationVelocity;
@@ -44,29 +45,43 @@ namespace LK.Runtime.Components
             _targetScale = scaleRange.Clamp(_targetScale + delta * scaleSpeed);
         }
 
-        public void ResetModel()
+        public void ResetModel(bool smooth)
         {
+            InitializeStartInfo();
+            
             _targetPosition = _startPosition;
             _targetRotation = _startRotation;
             _targetScale = _startScale;
+            
+            if (!smooth)
+            {
+                transform.localPosition = _startPosition;
+                transform.localEulerAngles = _startRotation;
+                transform.localScale = Vector3.one * _startScale;
+            }
         }
-
+        
         private void Start()
         {
-            _startPosition = transform.localPosition;
-            _startRotation = transform.eulerAngles;
-            _startScale = transform.localScale.x;
-
             _targetPosition = transform.localPosition;
             _targetRotation = transform.eulerAngles;
             _targetScale = transform.localScale.x;
         }
-
+        
         private void LateUpdate()
         {
             AlignToTarget();
         }
 
+        private void InitializeStartInfo()
+        {
+            if(_startInfoInitialized) return;
+            _startPosition = transform.localPosition;
+            _startRotation = transform.localEulerAngles;
+            _startScale = transform.localScale.x;
+            _startInfoInitialized = true;
+        }
+        
         private void AlignToTarget()
         {
             // 对齐位置
