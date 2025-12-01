@@ -20,7 +20,8 @@ namespace LK.Runtime.Components
         public enum Transition
         {
             None,
-            MaterialsSwap,    
+            MaterialsSwap,
+            Event,
         }
     
         private bool _isMouseDown;
@@ -52,7 +53,12 @@ namespace LK.Runtime.Components
         [SerializeField] private Material[] highlightedMaterials;
         [SerializeField] private Material[] pressedMaterials;
         [SerializeField] private Material[] disabledMaterials;
-    
+
+        [SerializeField] private UnityEvent normal;
+        [SerializeField] private UnityEvent highlighted;
+        [SerializeField] private UnityEvent pressed;
+        [SerializeField] private UnityEvent disabled;
+        
         public UnityEvent onClick;
     
         public bool Interactable
@@ -128,23 +134,30 @@ namespace LK.Runtime.Components
 
             var materials = GetMaterialsContainer();
             int materialsCount;
+
+            UnityEvent unityEvent;
+            
             switch (state)
             {
                 case State.Normal:
                     Array.Copy(normalMaterials, materials, normalMaterials.Length);
                     materialsCount = normalMaterials.Length;
+                    unityEvent = normal;
                     break;
                 case State.Highlighted:
                     Array.Copy(highlightedMaterials, materials, highlightedMaterials.Length);
                     materialsCount = highlightedMaterials.Length;
+                    unityEvent = highlighted;
                     break;
                 case State.Pressed:
                     Array.Copy(pressedMaterials, materials, pressedMaterials.Length);
                     materialsCount = pressedMaterials.Length;
+                    unityEvent = pressed;
                     break;
                 case State.Disabled:
                     Array.Copy(disabledMaterials, materials, disabledMaterials.Length);
                     materialsCount = disabledMaterials.Length;
+                    unityEvent = disabled;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(state), state, null);
@@ -157,6 +170,9 @@ namespace LK.Runtime.Components
                 case Transition.MaterialsSwap:
                     DoMaterialsSwap(materials, materialsCount);
                     ArrayPool<Material>.Shared.Return(materials);
+                    break;
+                case Transition.Event:
+                    unityEvent.Invoke();
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

@@ -11,19 +11,27 @@ namespace LK.Editor
     {
         private SerializedProperty _interactable, _transition, _onClick;
         private SerializedProperty _root, _ignoreChildren, _normalMaterials, _highlightedMaterials, _pressedMaterials, _disabledMaterials;
+        private SerializedProperty _normal, _highlighted, _pressed, _disabled;
         
+        private bool _showEvents;
         
         private void OnEnable()
         {
             _interactable = serializedObject.FindProperty("interactable");
             _transition = serializedObject.FindProperty("transition");
             _onClick = serializedObject.FindProperty("onClick");
+            
             _root = serializedObject.FindProperty("root");
             _ignoreChildren = serializedObject.FindProperty("ignoreChildren");
             _normalMaterials = serializedObject.FindProperty("normalMaterials");
             _highlightedMaterials = serializedObject.FindProperty("highlightedMaterials");
             _pressedMaterials = serializedObject.FindProperty("pressedMaterials");
             _disabledMaterials = serializedObject.FindProperty("disabledMaterials");
+            
+            _normal = serializedObject.FindProperty("normal");
+            _highlighted = serializedObject.FindProperty("highlighted");
+            _pressed = serializedObject.FindProperty("pressed");
+            _disabled = serializedObject.FindProperty("disabled");
         }
         
         public override void OnInspectorGUI()
@@ -47,6 +55,19 @@ namespace LK.Editor
                     EditorGUILayout.PropertyField(_pressedMaterials);
                     EditorGUILayout.PropertyField(_disabledMaterials);
                     EditorGUI.indentLevel--;
+                    break;
+                case Button3D.Transition.Event:
+                    _showEvents = EditorGUILayout.BeginFoldoutHeaderGroup(_showEvents, "Events");
+                    if (_showEvents)
+                    {
+                        EditorGUI.indentLevel++;
+                        EditorGUILayout.PropertyField(_normal);
+                        EditorGUILayout.PropertyField(_highlighted);
+                        EditorGUILayout.PropertyField(_pressed);
+                        EditorGUILayout.PropertyField(_disabled);
+                        EditorGUI.indentLevel--;
+                    }
+                    EditorGUILayout.EndFoldoutHeaderGroup();
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
