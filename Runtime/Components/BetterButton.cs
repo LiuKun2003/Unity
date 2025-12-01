@@ -2,6 +2,10 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
+#if !UNITY_2023_2_OR_NEWER
+using System.Collections;
+#endif 
+
 namespace LK.Runtime.Components
 {
     [AddComponentMenu("UI/Effects/BetterButton", 83)]
@@ -62,7 +66,7 @@ namespace LK.Runtime.Components
             if(from == to) return;
             
             float t = 0;
-            while (t < 1f && hoverCheck == _isHovered && _selectable.interactable)
+            while (t < 1f && hoverCheck == _isHovered)
             {
                 t += Time.deltaTime / animationDuration;
                 _selectable.transform.localScale = Vector3.Lerp(from, to, animationCurve.Evaluate(t));
@@ -91,7 +95,7 @@ namespace LK.Runtime.Components
             if(from == to) yield break;
 
             float t = 0;
-            while (t < 1f && hoverCheck == _isHovered && _selectable.interactable)
+            while (t < 1f && hoverCheck == _isHovered)
             {
                 t += Time.deltaTime / animationDuration;
                 _selectable.transform.localScale = Vector3.Lerp(from, to, animationCurve.Evaluate(t));

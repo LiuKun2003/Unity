@@ -12,12 +12,14 @@ namespace LK.Runtime.Components
             Previous,
             Next,
             First,
-            Trailer
+            Trailer,
+            Specific,
         }
         
         [SerializeField] private MultiPage multiPage;
         [SerializeField] private TurnBehavior turningType = TurnBehavior.Next;
-
+        [SerializeField] private int specific;
+        
         public MultiPage MultiPage
         {
             get => multiPage;
@@ -80,6 +82,7 @@ namespace LK.Runtime.Components
                 TurnBehavior.Next => pageIndex < multiPage.PagesCount - 1,
                 TurnBehavior.First => pageIndex != 0,
                 TurnBehavior.Trailer => pageIndex != multiPage.PagesCount - 1,
+                TurnBehavior.Specific => pageIndex != specific,
                 _ => false
             };
         }
@@ -106,6 +109,9 @@ namespace LK.Runtime.Components
                     break;
                 case TurnBehavior.Trailer:
                     multiPage.TrailerPage(); 
+                    break;
+                case TurnBehavior.Specific:
+                    multiPage.SetCurrentPage(specific);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
