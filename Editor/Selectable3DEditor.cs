@@ -1,25 +1,28 @@
 using System;
 using LK.Runtime.Components;
+using LK.Runtime.Utilities;
 using UnityEditor;
 using UnityEngine;
 
 namespace LK.Editor
 {
-    [CustomEditor(typeof(Button3D))]
+    [CustomEditor(typeof(Selectable3D), true)]
     [CanEditMultipleObjects]
     public class Button3DEditor : UnityEditor.Editor
     {
-        private SerializedProperty _interactable, _transition, _onClick;
+        private SerializedProperty _interactable, _transition;
         private SerializedProperty _root, _ignoreChildren, _normalMaterials, _highlightedMaterials, _pressedMaterials, _disabledMaterials;
         private SerializedProperty _normal, _highlighted, _pressed, _disabled;
         
         private bool _showEvents;
         
+        private string[] _propertyPathToExcludeForChildClasses;
+        
         private void OnEnable()
         {
+            var script = serializedObject.FindProperty("m_Script");
             _interactable = serializedObject.FindProperty("interactable");
             _transition = serializedObject.FindProperty("transition");
-            _onClick = serializedObject.FindProperty("onClick");
             
             _root = serializedObject.FindProperty("root");
             _ignoreChildren = serializedObject.FindProperty("ignoreChildren");
@@ -32,17 +35,34 @@ namespace LK.Editor
             _highlighted = serializedObject.FindProperty("highlighted");
             _pressed = serializedObject.FindProperty("pressed");
             _disabled = serializedObject.FindProperty("disabled");
+            
+            _propertyPathToExcludeForChildClasses = new[]
+            {
+                script.propertyPath,
+                _interactable.propertyPath,
+                _transition.propertyPath,
+                _root.propertyPath,
+                _ignoreChildren.propertyPath,
+                _normalMaterials.propertyPath,
+                _highlightedMaterials.propertyPath,
+                _pressedMaterials.propertyPath,
+                _disabledMaterials.propertyPath,
+                _normal.propertyPath,
+                _highlighted.propertyPath,
+                _pressed.propertyPath,
+                _disabled.propertyPath
+            };
         }
         
         public override void OnInspectorGUI()
         { 
             EditorGUILayout.PropertyField(_interactable);
             
-            switch (DrawEnumProperty<Button3D.Transition>(_transition))
+            switch (DrawEnumProperty<Selectable3D.Transition>(_transition))
             {
-                case Button3D.Transition.None:
+                case Selectable3D.Transition.None:
                     break;
-                case Button3D.Transition.MaterialsSwap:
+                case Selectable3D.Transition.MaterialsSwap:
                     EditorGUI.indentLevel++;
                     EditorGUILayout.PropertyField(_root);
                     if (_root.objectReferenceValue == null)
@@ -56,7 +76,7 @@ namespace LK.Editor
                     EditorGUILayout.PropertyField(_disabledMaterials);
                     EditorGUI.indentLevel--;
                     break;
-                case Button3D.Transition.Event:
+                case Selectable3D.Transition.Event:
                     _showEvents = EditorGUILayout.BeginFoldoutHeaderGroup(_showEvents, "Events");
                     if (_showEvents)
                     {
@@ -72,9 +92,9 @@ namespace LK.Editor
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-            
             EditorGUILayout.Space(10);
-            EditorGUILayout.PropertyField(_onClick);
+            
+            DrawPropertiesExcluding(serializedObject, _propertyPathToExcludeForChildClasses);
             
             serializedObject.ApplyModifiedProperties();
             EditorUtility.SetDirty(target);
