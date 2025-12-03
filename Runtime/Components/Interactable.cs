@@ -29,6 +29,24 @@ namespace LK.Runtime.Components
         private Vector3 _positionVelocity;
         private Vector3 _rotationVelocity;
         private Vector3 _scaleVelocity;
+        
+        public Vector3 TargetPosition
+        {
+            get => _targetPosition;
+            set => _targetPosition = value;
+        }
+        
+        public Vector3 TargetRotation
+        {
+            get => _targetRotation;
+            set => _targetRotation = value;
+        }
+        
+        public float TargetScale
+        {
+            get => _targetScale;
+            set => _targetScale = value;
+        }
 
         public void InputMove(Vector3 delta)
         {
