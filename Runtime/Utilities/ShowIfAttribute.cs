@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace LK.Runtime.Utility
+namespace LK.Runtime.Utilities
 {
     public class ShowIfAttribute : PropertyAttribute
     {

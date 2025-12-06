@@ -2,7 +2,11 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-namespace LK.Runtime.Utility
+#if !UNITY_2023_2_OR_NEWER
+using System.Collections;
+#endif 
+
+namespace LK.Runtime.Components
 {
     [AddComponentMenu("UI/Effects/BetterButton", 83)]
     [RequireComponent(typeof(Selectable))]
@@ -60,14 +64,19 @@ namespace LK.Runtime.Utility
         {
             var from = _selectable.transform.localScale;
             if(from == to) return;
+            
             float t = 0;
-            while (t < 1f && hoverCheck == _isHovered && _selectable.interactable)
+            while (t < 1f && hoverCheck == _isHovered)
             {
                 t += Time.deltaTime / animationDuration;
                 _selectable.transform.localScale = Vector3.Lerp(from, to, animationCurve.Evaluate(t));
                 await Awaitable.NextFrameAsync();
             }
-            _selectable.transform.localScale = to;
+
+            if (t >= 1f)
+            {
+                _selectable.transform.localScale = to;
+            }
         }
 #else
         private void BlowUp()
@@ -84,14 +93,19 @@ namespace LK.Runtime.Utility
         {
             var from = _selectable.transform.localScale;
             if(from == to) yield break;
+
             float t = 0;
-            while (t < 1f && hoverCheck == _isHovered && _selectable.interactable)
+            while (t < 1f && hoverCheck == _isHovered)
             {
                 t += Time.deltaTime / animationDuration;
                 _selectable.transform.localScale = Vector3.Lerp(from, to, animationCurve.Evaluate(t));
                 yield return null;
             }
-            _selectable.transform.localScale = to;
+
+            if (t >= 1f)
+            {
+                _selectable.transform.localScale = to;
+            }
         }
 #endif
         

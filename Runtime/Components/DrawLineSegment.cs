@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace LK.Runtime.Utility
+namespace LK.Runtime.Components
 {
     [RequireComponent(typeof(LineRenderer))]
     public class DrawLineSegment : MonoBehaviour

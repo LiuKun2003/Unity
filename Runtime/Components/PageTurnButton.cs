@@ -1,12 +1,10 @@
 using System;
-using System.Collections;
+using LK.Runtime.Utilities;
 using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.UI;
 
-namespace LK.Runtime.Utility
+namespace LK.Runtime.Components
 {
-    public class PageTurnButton : Selectable, IPointerClickHandler, ISubmitHandler
+    public class PageTurnButton : SimpleOverrideButton
     {
         public enum TurnBehavior
         {
@@ -14,12 +12,14 @@ namespace LK.Runtime.Utility
             Previous,
             Next,
             First,
-            Trailer
+            Trailer,
+            Specific,
         }
         
         [SerializeField] private MultiPage multiPage;
         [SerializeField] private TurnBehavior turningType = TurnBehavior.Next;
-
+        [SerializeField] private int specific;
+        
         public MultiPage MultiPage
         {
             get => multiPage;
@@ -58,25 +58,6 @@ namespace LK.Runtime.Utility
             }
         }
         
-        public virtual void OnPointerClick(PointerEventData eventData)
-        {
-            if (eventData.button != PointerEventData.InputButton.Left)
-                return;
-
-            Turn();
-        }
-
-        public virtual void OnSubmit(BaseEventData eventData)
-        {
-            Turn();
-            
-            if (!IsActive() || !IsInteractable())
-                return;
-
-            DoStateTransition(SelectionState.Pressed, false);
-            StartCoroutine(OnFinishSubmit());
-        }
-        
         protected override void OnEnable()
         {
             base.OnEnable();
@@ -101,17 +82,18 @@ namespace LK.Runtime.Utility
                 TurnBehavior.Next => pageIndex < multiPage.PagesCount - 1,
                 TurnBehavior.First => pageIndex != 0,
                 TurnBehavior.Trailer => pageIndex != multiPage.PagesCount - 1,
+                TurnBehavior.Specific => pageIndex != specific,
                 _ => false
             };
         }
         
-        private void Turn()
+        protected override void Click()
         {
-            if (!IsActive() || !IsInteractable() || multiPage == null)
+            if (multiPage == null)
+            {
                 return;
+            }
 
-            UISystemProfilerApi.AddMarker("Button.onClick", this);
-            
             switch (turningType)
             {
                 case TurnBehavior.None:
@@ -126,25 +108,14 @@ namespace LK.Runtime.Utility
                     multiPage.FirstPage();
                     break;
                 case TurnBehavior.Trailer:
-                    multiPage.TrailerPage();
+                    multiPage.TrailerPage(); 
+                    break;
+                case TurnBehavior.Specific:
+                    multiPage.SetCurrentPage(specific);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-        }
-        
-        private IEnumerator OnFinishSubmit()
-        {
-            var fadeTime = colors.fadeDuration;
-            var elapsedTime = 0f;
-
-            while (elapsedTime < fadeTime)
-            {
-                elapsedTime += Time.unscaledDeltaTime;
-                yield return null;
-            }
-
-            DoStateTransition(currentSelectionState, false);
         }
     }
 }

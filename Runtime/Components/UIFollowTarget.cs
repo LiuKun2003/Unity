@@ -1,8 +1,7 @@
-using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace LK.Runtime.Utility
+namespace LK.Runtime.Components
 {
     [AddComponentMenu("UI/Effects/UIFollowTarget", 84)]
     public class UIFollowTarget : UIBehaviour
@@ -19,32 +18,10 @@ namespace LK.Runtime.Utility
         protected override void Reset()
         {
             base.Reset();
-            _canvas = transform.GetComponentInParent<Canvas>();
+            CacheCanvas();
             activeCameraInScreenSpaceOverlay = Camera.main;
         }
 #endif
-        
-        protected override void Start()
-        {
-            base.Start();
-            _rectTransform = GetComponent<RectTransform>();
-        }
-        
-        private void Update()
-        {
-            _tracker.Clear();
-            if(target == null) return;
-            _tracker.Add(gameObject, _rectTransform, DrivenTransformProperties.AnchoredPosition3D);
-            var activeCamera = _canvas.renderMode switch
-            {
-                RenderMode.ScreenSpaceOverlay => null,
-                RenderMode.ScreenSpaceCamera or RenderMode.WorldSpace => _canvas.worldCamera,
-                _ => throw new ArgumentOutOfRangeException()
-            };
-            var screenPoint = (activeCamera ?? activeCameraInScreenSpaceOverlay).WorldToScreenPoint(target.transform.position + offset);
-            RectTransformUtility.ScreenPointToWorldPointInRectangle(_rectTransform, screenPoint, activeCamera, out var worldPoint);
-            _rectTransform.position = worldPoint;
-        }
 
         protected override void OnCanvasHierarchyChanged()
         {
@@ -52,10 +29,27 @@ namespace LK.Runtime.Utility
             CacheCanvas(); 
         }
 
+        protected override void Start()
+        {
+            base.Start();
+            _rectTransform = GetComponent<RectTransform>();
+        }
+        
         protected override void OnDisable()
         {
             base.OnDisable();
             _tracker.Clear();
+        }
+        
+        private void Update()
+        {
+            _tracker.Clear();
+            _tracker.Add(this, _rectTransform, DrivenTransformProperties.AnchoredPosition3D);
+            if(target == null) return;
+            var activeCamera = _canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : _canvas.worldCamera;
+            var screenPoint = (activeCamera ?? activeCameraInScreenSpaceOverlay).WorldToScreenPoint(target.transform.position + offset);
+            RectTransformUtility.ScreenPointToWorldPointInRectangle(_rectTransform, screenPoint, activeCamera, out var worldPoint);
+            _rectTransform.position = worldPoint;
         }
         
         private void CacheCanvas()
