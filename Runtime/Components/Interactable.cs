@@ -84,6 +84,8 @@ namespace LK.Runtime.Components
             _targetPosition = transform.localPosition;
             _targetRotation = transform.eulerAngles;
             _targetScale = transform.localScale.x;
+            
+            InitializeStartInfo();
         }
         
         private void LateUpdate()
