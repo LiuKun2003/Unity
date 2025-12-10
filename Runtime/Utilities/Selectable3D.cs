@@ -1,5 +1,4 @@
 using System;
-using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -215,7 +214,6 @@ namespace LK.Runtime.Utilities
                 EventSystem.current.SetSelectedGameObject(null);
 
             DoMaterialsSwap(Array.Empty<Material>());
-
             DoStateTransition(CurrentSelectionState);
         }
         
@@ -379,15 +377,6 @@ namespace LK.Runtime.Utilities
         {
             DoStateTransition(CurrentSelectionState);
         }
-        
-        private Material[] GetMaterialsContainer()
-        {
-            var minimumLength = Math.Max(materialsBlock.NormalMaterials.Length, materialsBlock.HighlightedMaterials.Length);
-            minimumLength = Math.Max(minimumLength, materialsBlock.PressedMaterials.Length);
-            minimumLength = Math.Max(minimumLength, materialsBlock.DisabledMaterials.Length);
-            minimumLength = Math.Max(minimumLength, materialsBlock.SelectedMaterials.Length);
-            return ArrayPool<Material>.Shared.Rent(minimumLength);
-        }
 
         private void DoMaterialsSwap(Material[] materials)
         {
@@ -397,8 +386,16 @@ namespace LK.Runtime.Utilities
             foreach (var meshRenderer in meshRenderers)
             {
                 var original = meshRenderer.sharedMaterials;
-                var newMaterials = original.Except(materialsBlock.MaterialsUnion).Union(materials).ToArray();
-                meshRenderer.materials = newMaterials;
+                if (original == null)
+                {
+                    meshRenderer.materials = materials;
+                }
+                else
+                {
+                    var newMaterials = original.Except(materialsBlock.MaterialsUnion);
+                    if(materials != null) newMaterials = newMaterials.Union(materials);
+                    meshRenderer.materials = newMaterials.ToArray();
+                }
             }
         }
         

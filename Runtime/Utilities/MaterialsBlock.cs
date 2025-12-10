@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -13,7 +14,24 @@ namespace LK.Runtime.Utilities
         [field: SerializeField] public Material[] SelectedMaterials { get; set; }
         [field: SerializeField] public Material[] DisabledMaterials { get; set; }
 
-        public Material[] MaterialsUnion => NormalMaterials.Union(HighlightedMaterials).Union(PressedMaterials).Union(SelectedMaterials).Union(DisabledMaterials).ToArray();
+        public Material[] MaterialsUnion
+        {
+            get
+            {
+                IEnumerable<Material> result = Array.Empty<Material>();
+                if (NormalMaterials != null)
+                    result = result.Union(NormalMaterials);
+                if (HighlightedMaterials != null)
+                    result = result.Union(HighlightedMaterials);
+                if (PressedMaterials != null)
+                    result = result.Union(PressedMaterials);
+                if (SelectedMaterials != null)
+                    result = result.Union(SelectedMaterials);
+                if (DisabledMaterials != null)
+                    result = result.Union(DisabledMaterials);
+                return result.ToArray();
+            }
+        }
 
         public bool Equals(MaterialsBlock other)
         {
