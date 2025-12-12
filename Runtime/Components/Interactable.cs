@@ -5,25 +5,25 @@ using UnityEngine.Serialization;
 
 namespace LK.Runtime.Components
 {
-    public class Interactable : MonoBehaviour
+    public class Interactable : TransformableObject
     {
         [SerializeField] private float moveSpeed = 1f;
         [SerializeField] private float moveSmooth = 0.2f;
 
-        [SerializeField] private float rotateSpeed = 30f;
+        [SerializeField] private float rotateSpeed = 10f;
         [SerializeField] private float rotateSmooth = 0.2f;
 
         [SerializeField] private float scaleSpeed = 1f;
         [SerializeField] private float scaleSmooth = 0.2f;
-        [SerializeField] private RangedFloat scaleRange = new RangedFloat(1f, 10f);
+        [SerializeField] private RangedFloat scaleRange = new RangedFloat(0.5f, 2f);
 
         private Vector3 _targetPosition;
         private Vector3 _targetRotation;
-        private float _targetScale;
+        private Vector3 _targetScale;
 
         private Vector3 _startPosition;
         private Vector3 _startRotation;
-        private float _startScale;
+        private Vector3 _startScale;
         private bool _startInfoInitialized;
 
         private Vector3 _positionVelocity;
@@ -42,25 +42,26 @@ namespace LK.Runtime.Components
             set => _targetRotation = value;
         }
         
-        public float TargetScale
+        public Vector3 TargetScale
         {
             get => _targetScale;
             set => _targetScale = value;
         }
-
-        public void InputMove(Vector3 delta)
+        
+        public override void ProcessMoveInput(Vector3 delta)
         {
             _targetPosition += delta * moveSpeed;
         }
 
-        public void InputRotate(Vector3 delta)
+        public override void ProcessRotateInput(Vector3 delta)
         {
             _targetRotation += new Vector3(delta.y, -delta.x, 0f) * rotateSpeed;
         }
 
-        public void InputScale(float delta)
+        public override void ProcessScaleInput(Vector3 delta)
         {
-            _targetScale = scaleRange.Clamp(_targetScale + delta * scaleSpeed);
+            _targetScale += delta * scaleSpeed;
+            _targetScale = ClampScale(_targetScale);
         }
 
         public void ResetModel(bool smooth)
@@ -75,15 +76,15 @@ namespace LK.Runtime.Components
             {
                 transform.localPosition = _startPosition;
                 transform.localEulerAngles = _startRotation;
-                transform.localScale = Vector3.one * _startScale;
+                transform.localScale = _startScale;
             }
         }
         
         private void Start()
         {
             _targetPosition = transform.localPosition;
-            _targetRotation = transform.eulerAngles;
-            _targetScale = transform.localScale.x;
+            _targetRotation = transform.localEulerAngles;
+            _targetScale = transform.localScale;
             
             InitializeStartInfo();
         }
@@ -98,15 +99,14 @@ namespace LK.Runtime.Components
             if(_startInfoInitialized) return;
             _startPosition = transform.localPosition;
             _startRotation = transform.localEulerAngles;
-            _startScale = transform.localScale.x;
+            _startScale = transform.localScale;
             _startInfoInitialized = true;
         }
         
         private void AlignToTarget()
         {
             // 对齐位置
-            transform.localPosition = Vector3.SmoothDamp(transform.localPosition, _targetPosition,
-                ref _positionVelocity, moveSmooth);
+            transform.localPosition = Vector3.SmoothDamp(transform.localPosition, _targetPosition, ref _positionVelocity, moveSmooth);
 
             // 对齐旋转
             var targetQuaternion = Quaternion.Euler(_targetRotation);
@@ -114,9 +114,15 @@ namespace LK.Runtime.Components
             transform.localRotation = Quaternion.RotateTowards(transform.localRotation, targetQuaternion, rotationStep);
 
             // 对齐缩放
-            var targetVector3Scale = _targetScale * Vector3.one;
-            transform.localScale =
-                Vector3.SmoothDamp(transform.localScale, targetVector3Scale, ref _scaleVelocity, scaleSmooth);
+            transform.localScale = Vector3.SmoothDamp(transform.localScale, _targetScale, ref _scaleVelocity, scaleSmooth);
+        }
+
+        private Vector3 ClampScale(Vector3 scale)
+        {
+            scale.x = Mathf.Clamp(scale.x, _startScale.x * scaleRange.Lower, _startScale.x * scaleRange.Upper);
+            scale.y = Mathf.Clamp(scale.y, _startScale.y * scaleRange.Lower, _startScale.y * scaleRange.Upper);
+            scale.z = Mathf.Clamp(scale.z, _startScale.z * scaleRange.Lower, _startScale.z * scaleRange.Upper);
+            return scale;
         }
     }
 }
