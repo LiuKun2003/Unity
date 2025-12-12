@@ -9,7 +9,6 @@ using UnityEngine.UI;
 
 namespace LK.Runtime.Components
 {
-    [RequireComponent(typeof(Collider))]
     public class Button3D : Selectable3D, IPointerClickHandler
     {
         [field: SerializeField]

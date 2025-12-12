@@ -9,7 +9,6 @@ using UnityEngine.UI;
 
 namespace LK.Runtime.Utilities
 {
-    [RequireComponent(typeof(Collider))]
     public class Selectable3D : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPointerEnterHandler, IPointerExitHandler, ISelectHandler, IDeselectHandler
     {
         public enum TransitionMode
