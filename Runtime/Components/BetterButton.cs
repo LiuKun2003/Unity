@@ -10,27 +10,43 @@ namespace LK.Runtime.Components
 {
     [AddComponentMenu("UI/Effects/BetterButton", 83)]
     [RequireComponent(typeof(Selectable))]
-    public class BetterButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+    public class BetterButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler
     {
-        [SerializeField] [Range(1, 2)] private float hoverScaleMultiplier = 1.2f;
+        [SerializeField] [Range(0, 2)] private float hoverScaleMultiplier = 1.2f;
+        [SerializeField] [Range(0, 2)] private float pressedScaleMultiplier = 1.1f;
         [SerializeField] [Range(0, 1)] private float animationDuration = 0.2f;
         [SerializeField] private AnimationCurve animationCurve = AnimationCurve.Linear(0f, 0f, 1f, 1f);
     
         private Selectable _selectable;
         private Vector3 _originalScale;
         private bool _isHovered;
+        private bool _isPressed;
+        private bool _dirtyTarget;
 
         public void OnPointerEnter(PointerEventData eventData)
         {
             if(!_selectable.interactable) return;
             _isHovered = true;
-            BlowUp();
+            UpdateScale();
         }
 
         public void OnPointerExit(PointerEventData eventData)
         {
             _isHovered = false;
-            Restore();
+            UpdateScale();
+        }
+        
+        public void OnPointerDown(PointerEventData eventData)
+        {
+            if(!_selectable.interactable) return;
+            _isPressed = true;
+            UpdateScale();
+        }
+        
+        public void OnPointerUp(PointerEventData eventData)
+        {
+            _isPressed = false;
+            UpdateScale();
         }
 
         private void Awake()
@@ -46,56 +62,38 @@ namespace LK.Runtime.Components
 
         private void OnDisable()
         {
-            _isHovered = false;
+            _dirtyTarget = false;
         }
         
-#if UNITY_2023_2_OR_NEWER
-        private void BlowUp()
+        private void UpdateScale()
         {
-            _ = ScaleTo(_originalScale * hoverScaleMultiplier, true);
+            Vector3 to;
+            if (_isPressed)
+            {
+                to = _originalScale * pressedScaleMultiplier;
+            }
+            else if (_isHovered)
+            {
+                to = _originalScale * hoverScaleMultiplier;
+            }
+            else
+            {
+                to = _originalScale;
+            }
+            _dirtyTarget = true;
+            StartCoroutine(LocalScaleTo(to));
         }
-        
-        private void Restore()
+
+        private IEnumerator LocalScaleTo(Vector3 to)
         {
-            _ = ScaleTo(_originalScale, false);
-        }
-        
-        private async Awaitable ScaleTo(Vector3 to, bool hoverCheck)
-        {
-            var from = _selectable.transform.localScale;
-            if(from == to) return;
+            yield return null;
+            _dirtyTarget = false;
             
-            float t = 0;
-            while (t < 1f && hoverCheck == _isHovered)
-            {
-                t += Time.deltaTime / animationDuration;
-                _selectable.transform.localScale = Vector3.Lerp(from, to, animationCurve.Evaluate(t));
-                await Awaitable.NextFrameAsync();
-            }
-
-            if (t >= 1f)
-            {
-                _selectable.transform.localScale = to;
-            }
-        }
-#else
-        private void BlowUp()
-        {
-            StartCoroutine(ScaleTo(_originalScale * hoverScaleMultiplier, true));
-        }
-
-        private void Restore()
-        {
-            StartCoroutine(ScaleTo(_originalScale, false));
-        }
-
-        private IEnumerator ScaleTo(Vector3 to, bool hoverCheck)
-        {
             var from = _selectable.transform.localScale;
             if(from == to) yield break;
-
+            
             float t = 0;
-            while (t < 1f && hoverCheck == _isHovered)
+            while (t < 1f && !_dirtyTarget)
             {
                 t += Time.deltaTime / animationDuration;
                 _selectable.transform.localScale = Vector3.Lerp(from, to, animationCurve.Evaluate(t));
@@ -107,7 +105,5 @@ namespace LK.Runtime.Components
                 _selectable.transform.localScale = to;
             }
         }
-#endif
-        
     }
 }
