@@ -16,7 +16,6 @@ namespace LK.Runtime.Procedures
         
         public virtual void OnBegin()
         {
-            gameObject.SetActive(true);
             _isCompleted = false;
         }
 
@@ -28,7 +27,6 @@ namespace LK.Runtime.Procedures
         public virtual void OnEnd()
         {
             _isCompleted = false;
-            gameObject.SetActive(false);
         }
 
         public virtual void Release()

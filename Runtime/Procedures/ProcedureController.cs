@@ -52,6 +52,7 @@ namespace LK.Runtime.Procedures
             if(_init) ReleaseAllProcedure();
             InitializeAllProcedure();
             BeginStartProcedure();
+            _isRunning = true;
         }
         
         public void SetProcedure(int index)
@@ -72,7 +73,7 @@ namespace LK.Runtime.Procedures
         private void Update()
         {
             if(!Running) return;
-            
+            Debug.Log($"ProcedureController current procedure : {procedures[_currentProcedureIndex].name}");
             var procedure = procedures[_currentProcedureIndex];
             
             if (!procedure.IsCompleted)
