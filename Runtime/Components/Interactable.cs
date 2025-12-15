@@ -1,7 +1,5 @@
-using System;
 using LK.Runtime.Utilities;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace LK.Runtime.Components
 {
@@ -27,7 +25,6 @@ namespace LK.Runtime.Components
         private bool _startInfoInitialized;
 
         private Vector3 _positionVelocity;
-        private Vector3 _rotationVelocity;
         private Vector3 _scaleVelocity;
         
         public Vector3 TargetPosition
