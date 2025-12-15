@@ -11,11 +11,12 @@ namespace LK.Runtime.Procedures
 
         public virtual void Init()
         {
-            gameObject.SetActive(true);
+
         }
         
         public virtual void OnBegin()
         {
+            gameObject.SetActive(true);
             _isCompleted = false;
         }
 
@@ -27,17 +28,17 @@ namespace LK.Runtime.Procedures
         public virtual void OnEnd()
         {
             _isCompleted = false;
+            gameObject.SetActive(false);
         }
 
         public virtual void Release()
         {
-            gameObject.SetActive(false);
+
         }
         
         protected void Complete()
         {
-            _isCompleted = true;
-            _isBack = false;
+            Complete(false);
         }
         
         protected void Complete(bool isBack)
