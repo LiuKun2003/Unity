@@ -7,7 +7,7 @@ using UnityEngine.UIElements;
 
 namespace LK.Runtime.Components
 {
-    public class InputProviderByLegacyInput : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IScrollHandler
+    public class InputProviderByEventSystem : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPointerMoveHandler, IScrollHandler
     {
         [SerializeField] private TransformableObject target;
         [SerializeField] private bool enableMoveInput = true;
@@ -16,10 +16,6 @@ namespace LK.Runtime.Components
         
         [SerializeField] private PointerEventData.InputButton moveKey = PointerEventData.InputButton.Left;
         [SerializeField] private PointerEventData.InputButton rotateKey = PointerEventData.InputButton.Right;
-        
-        [SerializeField] private string mouseXAxis = "Mouse X";
-        [SerializeField] private string mouseYAxis = "Mouse Y";
-        [SerializeField] private string scaleAxis = "Mouse ScrollWheel";
         
         private bool _isPressed;
         private PointerEventData.InputButton _lastPressedButton;
@@ -31,38 +27,28 @@ namespace LK.Runtime.Components
         }
 #endif
 
-        public void Update()
-        {
-            if (!_isPressed) return;
-            if(enableMoveInput && moveKey == _lastPressedButton) target.ProcessMoveInput(GetMouseXYDelta());
-            if(enableRotateInput && rotateKey == _lastPressedButton) target.ProcessRotateInput(GetMouseXYDelta());
-        }
-
         public void OnPointerDown(PointerEventData eventData)
         {
             _isPressed = true;
             _lastPressedButton = eventData.button;
         }
-
+        
         public void OnPointerUp(PointerEventData eventData)
         {
             _isPressed = false;
         }
         
+        public void OnPointerMove(PointerEventData eventData)
+        {
+            if (!_isPressed) return;
+            if(enableMoveInput && moveKey == _lastPressedButton) target.ProcessMoveInput(eventData.delta);
+            if(enableRotateInput && rotateKey == _lastPressedButton) target.ProcessRotateInput(eventData.delta);
+        }
+        
         public void OnScroll(PointerEventData eventData)
         {
             if (!enableScaleInput) return;
-            target.ProcessScaleInput(GetScrollDelta());
-        }
-        
-        private Vector3 GetMouseXYDelta()
-        {
-            return new Vector3(Input.GetAxisRaw(mouseXAxis), Input.GetAxisRaw(mouseYAxis), 0f);
-        }
-
-        private Vector3 GetScrollDelta()
-        {
-            return Input.GetAxisRaw(scaleAxis) * Vector3.one;
+            target.ProcessScaleInput(eventData.scrollDelta.y * Vector3.one);
         }
     }
 }
