@@ -7,7 +7,6 @@ using UnityEngine.UIElements;
 
 namespace LK.Runtime.Components
 {
-    [RequireComponent(typeof(Collider))]
     public class InputProviderByLegacyInput : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IScrollHandler
     {
         [SerializeField] private TransformableObject target;
