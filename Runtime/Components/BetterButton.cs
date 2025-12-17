@@ -1,10 +1,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-
-#if !UNITY_2023_2_OR_NEWER
 using System.Collections;
-#endif 
 
 namespace LK.Runtime.Components
 {
