@@ -1,7 +1,7 @@
 using LK.Runtime.Utilities;
 using UnityEngine;
 
-namespace LK.Runtime.Components
+namespace LK.Runtime.Interaction
 {
     public class Interactable : TransformableObject
     {

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace LK.Runtime.Utilities
+namespace LK.Runtime.Interaction
 {
     public abstract class TransformableObject : MonoBehaviour
     {
