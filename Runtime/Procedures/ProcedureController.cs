@@ -17,6 +17,9 @@ namespace LK.Runtime.Procedures
         private int _currentProcedureIndex = -1;
         private bool _init;
         private bool _isRunning;
+        private bool disableStateCache = true;
+        private bool hasDisabled;
+        
         private bool Running
         {
             get => _isRunning;
@@ -69,11 +72,16 @@ namespace LK.Runtime.Procedures
         {
             EvaluateAndSetCurrentProcedure(_currentProcedureIndex - 1);
         }
-        
+
+        private void OnEnable()
+        {
+            if(!hasDisabled) return;
+            Running = disableStateCache;
+        }
+
         private void Update()
         {
             if(!Running) return;
-            Debug.Log($"ProcedureController current procedure : {procedures[_currentProcedureIndex].name}");
             var procedure = procedures[_currentProcedureIndex];
             
             if (!procedure.IsCompleted)
@@ -102,6 +110,13 @@ namespace LK.Runtime.Procedures
                     SetCurrentProcedure(_currentProcedureIndex + 1);
                 }
             }
+        }
+
+        private void OnDisable()
+        {
+            disableStateCache = Running;
+            Running = false;
+            hasDisabled = true;
         }
 
         private void EvaluateAndSetCurrentProcedure(int index)
@@ -146,6 +161,7 @@ namespace LK.Runtime.Procedures
             procedures[_currentProcedureIndex].OnEnd();
             _currentProcedureIndex = index;
             procedures[_currentProcedureIndex].OnBegin();
+            LogCurrentProcedure();
         }
 
         private void BeginStartProcedure()
@@ -157,6 +173,7 @@ namespace LK.Runtime.Procedures
             
             _currentProcedureIndex = startProcedureIndex;
             procedures[_currentProcedureIndex].OnBegin();
+            LogCurrentProcedure();
         }
 
         private void End()
@@ -165,6 +182,11 @@ namespace LK.Runtime.Procedures
             procedures[_currentProcedureIndex].OnEnd();
             _currentProcedureIndex = -1;
             Debug.Log("ProcedureController : All procedure are completed.");
+        }
+
+        private void LogCurrentProcedure()
+        {
+            Debug.Log($"ProcedureController current procedure : {procedures[_currentProcedureIndex].name} [{procedures[_currentProcedureIndex].GetType().Name}]");
         }
     }
 }
