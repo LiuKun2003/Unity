@@ -22,12 +22,15 @@ namespace LK.Runtime.Interaction
 #if UNITY_EDITOR
         protected virtual void Reset()
         {
-            target = GetComponent<TransformableObject>();
+            target = GetComponentInChildren<TransformableObject>();
+            if (target != null) return;
+            target = GetComponentInParent<TransformableObject>();
         }
 #endif
 
         protected void OutDelta(Vector3 delta)
         {
+            if (target == null) return;
             switch (Out)
             {
                 case OutMode.None:
