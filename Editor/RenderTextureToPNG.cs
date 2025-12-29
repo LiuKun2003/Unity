@@ -28,17 +28,17 @@ namespace LK.Editor
             if (GUILayout.Button("Generate PNG"))
             {
                 // 弹出文件保存对话框
-                var _savePath = EditorUtility.SaveFilePanel("Save PNG", "", "RenderTexture", "png");
-                if (!string.IsNullOrEmpty(_savePath))
+                var savePath = EditorUtility.SaveFilePanel("Save PNG", "", "RenderTexture", "png");
+                if (!string.IsNullOrEmpty(savePath))
                 {
                     // 调用保存方法
-                    SaveRenderTextureAsPNG(_renderTexture, _savePath);
+                    SaveRenderTextureAsPNG(_renderTexture, savePath);
                 }
             }
             EditorGUI.EndDisabledGroup();
         }
 
-        private void SaveRenderTextureAsPNG(RenderTexture rt, string path)
+        private static void SaveRenderTextureAsPNG(RenderTexture rt, string path)
         {
             // 创建一个临时的Texture2D来存储RenderTexture的内容
             var currentActive = RenderTexture.active;
