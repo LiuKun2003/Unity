@@ -56,6 +56,7 @@ namespace LK.Runtime.Procedures
             InitializeAllProcedure();
             BeginStartProcedure();
             _isRunning = true;
+            hasDisabled = !gameObject.activeSelf;
         }
         
         public void SetProcedure(int index)
