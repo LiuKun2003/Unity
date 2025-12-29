@@ -6,7 +6,7 @@ namespace LK.Runtime.Components
     /// <summary>
     /// UI跟随鼠标组件
     /// </summary>
-    [AddComponentMenu("UI/Effects/UIFollowTarget", 85)]
+    [AddComponentMenu("UI/Effects/UIFollowMouse", 85)]
     public class UIFollowMouse : UIBehaviour
     {
         [SerializeField] private float smoothSpeed = 0.1f;
