@@ -1,4 +1,5 @@
 #if UNITY_EDITOR
+using System.Linq;
 using LK.Runtime.Components;
 using LK.Runtime.Utilities;
 using UnityEditor;
@@ -24,24 +25,12 @@ namespace LK.Editor
                 : 0f;
         }
 
-        private bool ShouldShow(SerializedProperty property)
-        {
-            if (attribute is not ShowIfAttribute attr) return true;
-
-            foreach (var fieldName in attr.ConditionFieldNames)
-            {
-                string conditionPath = property.propertyPath.Replace(property.name, fieldName);
-                var condProp = property.serializedObject.FindProperty(conditionPath);
-
-                if (condProp == null ||
-                    condProp.propertyType != SerializedPropertyType.Boolean ||
-                    !condProp.boolValue)
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
+        private bool ShouldShow(SerializedProperty property) => 
+            attribute is not ShowIfAttribute attr || 
+            attr.ConditionFieldNames
+                .Select(fieldName => property.propertyPath.Replace(property.name, fieldName))
+                .Select(conditionPath => property.serializedObject.FindProperty(conditionPath))
+                .All(condProp => condProp is { propertyType: SerializedPropertyType.Boolean, boolValue: true });
     }
 }
 #endif
