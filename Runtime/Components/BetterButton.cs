@@ -35,7 +35,7 @@ namespace LK.Runtime.Components
         
         public void OnPointerDown(PointerEventData eventData)
         {
-            if(!_selectable.interactable) return;
+            if(!_selectable.interactable || eventData.button != PointerEventData.InputButton.Left) return;
             _isPressed = true;
             UpdateScale();
         }
