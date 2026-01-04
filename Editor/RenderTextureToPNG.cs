@@ -19,7 +19,7 @@ namespace LK.Editor
             _renderTexture = (RenderTexture)EditorGUILayout.ObjectField("RenderTexture", _renderTexture, typeof(RenderTexture), false);
             if (_renderTexture == null)
             {
-                EditorGUILayout.HelpBox("No renderTexture selected.", MessageType.Warning);
+                EditorGUILayout.HelpBox("No RenderTexture selected.", MessageType.Warning);
             }
             
             var canSave = _renderTexture != null;
