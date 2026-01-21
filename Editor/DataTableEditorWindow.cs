@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -174,11 +175,11 @@ namespace LK.Editor
             });
         
             // 绘制每一行
-            foreach (DataRow row in dataTable.Rows)
+            foreach (var i in Enumerable.Range(0, dataTable.Rows.Count))
             {
                 EditorGUILayout.BeginHorizontal();
                 {
-                    var i = dataTable.Rows.IndexOf(row);
+                    var row = dataTable.Rows[i];
                     // 绘制插入行按钮
                     if (GUILayout.Button("Insert", GUILayout.Height(cellHeight), GUILayout.Width(cellWidth)))
                     {
