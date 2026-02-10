@@ -52,7 +52,7 @@ namespace LK.Runtime.Interaction
 
         public override void ProcessRotateInput(Vector3 delta)
         {
-            _targetRotation += new Vector3(delta.y, -delta.x, 0f) * rotateSpeed;
+            _targetRotation += new Vector3(delta.y, delta.x, 0f) * rotateSpeed;
         }
 
         public override void ProcessScaleInput(Vector3 delta)
