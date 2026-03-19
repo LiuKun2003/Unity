@@ -16,12 +16,18 @@ namespace LK.Runtime.Interaction
             OutDelta(scrollScale * Input.GetAxisRaw(scrollAxis));
         }
 
-        public void OnMouseEnter()
+        private void OnMouseEnter()
         {
+            if(!enabled) return;
             _isHover = true;
         }
         
-        public void OnMouseExit()
+        private void OnMouseExit()
+        {
+            _isHover = false;
+        }
+        
+        private void OnDisable()
         {
             _isHover = false;
         }

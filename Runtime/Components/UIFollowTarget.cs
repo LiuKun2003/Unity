@@ -33,6 +33,7 @@ namespace LK.Runtime.Components
         {
             base.Start();
             _rectTransform = GetComponent<RectTransform>();
+            Follow();
         }
         
         protected override void OnDisable()
@@ -45,16 +46,21 @@ namespace LK.Runtime.Components
         {
             _tracker.Clear();
             _tracker.Add(this, _rectTransform, DrivenTransformProperties.AnchoredPosition3D);
-            if(target == null) return;
-            var activeCamera = _canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : _canvas.worldCamera;
-            var screenPoint = (activeCamera ?? activeCameraInScreenSpaceOverlay).WorldToScreenPoint(target.transform.position + offset);
-            RectTransformUtility.ScreenPointToWorldPointInRectangle(_rectTransform, screenPoint, activeCamera, out var worldPoint);
-            _rectTransform.position = worldPoint;
+            Follow();
         }
         
         private void CacheCanvas()
         {
             _canvas = GetComponentInParent<Canvas>();
+        }
+
+        private void Follow()
+        {
+            if(target == null) return;
+            var activeCamera = _canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : _canvas.worldCamera;
+            var screenPoint = (activeCamera ?? activeCameraInScreenSpaceOverlay).WorldToScreenPoint(target.transform.position + offset);
+            RectTransformUtility.ScreenPointToWorldPointInRectangle(_rectTransform, screenPoint, activeCamera, out var worldPoint);
+            _rectTransform.position = worldPoint;
         }
     }
 }
