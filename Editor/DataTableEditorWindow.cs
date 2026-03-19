@@ -10,6 +10,9 @@ namespace LK.Editor
 {
     public class DataTableEditorWindow : EditorWindow
     {
+        private const string OpenFileDirectoryKey = "DataTableEditorWindow_LastOpenFilePath";
+        private const string SaveFileDirectoryKey = "DataTableEditorWindow_LastSaveFilePath";
+        
         private static class ExceptionResource
         {
             public const string ColumnNameEmpty = "The column name can't be empty!";
@@ -49,7 +52,11 @@ namespace LK.Editor
         private void OnEnable()
         {
             // 初始化数据（默认4x4）
-            InitializeData(4, 4);
+            var lastOpen = EditorPrefs.GetString(OpenFileDirectoryKey);
+            if(string.IsNullOrEmpty(lastOpen))
+                InitializeData(4, 4);
+            else
+                OpenFile(lastOpen);
         }
     
         private void OnGUI()
@@ -130,9 +137,12 @@ namespace LK.Editor
             {
                 if (EditorUtility.DisplayDialog("Confirm", "Clear all data?", "Yes", "No"))
                 {
-                    foreach (DataRow row in dataTable.Rows)
+                    for (var i = 0; i < dataTable.Rows.Count; i++ )
                     {
-                        row.ItemArray = new object[dataTable.Columns.Count];
+                        for (var j = 0; j < dataTable.Columns.Count; j++)
+                        {
+                            dataTable.Rows[i][j] = null;
+                        }
                     }
                 }
             }
@@ -170,12 +180,19 @@ namespace LK.Editor
                 }
                 else
                 {
-                    col.ColumnName = newColumnName;
+                    try
+                    {
+                        col.ColumnName = newColumnName;
+                    }
+                    catch (DuplicateNameException e)
+                    {
+                        Debug.LogError(e.Message);
+                    }
                 }
             });
         
             // 绘制每一行
-            foreach (var i in Enumerable.Range(0, dataTable.Rows.Count))
+            for (var i = 0; i < dataTable.Rows.Count; i++)
             {
                 EditorGUILayout.BeginHorizontal();
                 {
@@ -272,18 +289,27 @@ namespace LK.Editor
         // 打开文件
         private void OpenFile()
         {
-            var openPath = EditorUtility.OpenFilePanel("Open Data Table File", "", "");
+            var directory = EditorPrefs.GetString(OpenFileDirectoryKey, Application.dataPath);
+            var openPath = EditorUtility.OpenFilePanel("Open Data Table File", directory, "");
+            OpenFile(openPath);
+        }
+
+        private void OpenFile(string openPath)
+        {
+            EditorPrefs.SetString(OpenFileDirectoryKey, openPath);
             if (string.IsNullOrEmpty(openPath)) return;
             var openedDataTable = new DataTable();
             openedDataTable.ReadXml(openPath);
             dataTable = openedDataTable;
             Debug.Log($"Open DataTable Success. [{DateTime.Now:F}] {openPath}");
         }
-    
+        
         // 保存表到文件
         private void SaveAs()
         {
-            var savePath = EditorUtility.SaveFilePanel("Save Data Table File", "", "NewDataTable", "xml");
+            var directory = EditorPrefs.GetString(SaveFileDirectoryKey, Application.dataPath);
+            var savePath = EditorUtility.SaveFilePanel("Save Data Table File", directory, "NewDataTable", "xml");
+            EditorPrefs.SetString(SaveFileDirectoryKey, savePath);
             if (string.IsNullOrEmpty(savePath)) return;
             var file = new FileInfo(savePath);
             using var writer = file.CreateText();
