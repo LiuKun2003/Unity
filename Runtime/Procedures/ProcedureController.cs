@@ -1,6 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using LK.Runtime.Utilities;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
+using Debug = UnityEngine.Debug;
 
 namespace LK.Runtime.Procedures
 {
@@ -9,116 +14,180 @@ namespace LK.Runtime.Procedures
         [SerializeField] private List<Procedure> procedures;
         [SerializeField] private int startProcedureIndex = 0;
         
-        private int _currentProcedureIndex;
+        private int _currentProcedureIndex = -1;
         private bool _init;
+        private bool _isRunning;
+        private bool disableStateCache = true;
+        private bool hasDisabled;
         
-        private int _newProcedureIndex;
-        private bool _dirty;
+        private bool Running
+        {
+            get => _isRunning;
+            set
+            {
+                if (!SetPropertyUtility.SetStruct(ref _isRunning, value)) return;
+                
+                if (value)
+                {
+                    InitializeAllProcedure();
+                }
+                else
+                {
+                    ReleaseAllProcedure();
+                }
+            }
+        }
+
+        public void Activate()
+        {
+            Running = true;
+            Debug.Log("ProcedureController : Active");
+        }
+        
+        public void Deactivate()
+        {
+            Running = false;
+            Debug.Log("ProcedureController : Inactive");
+        }
+        
+        public void Restart()
+        {
+            if(_init) ReleaseAllProcedure();
+            InitializeAllProcedure();
+            BeginStartProcedure();
+            _isRunning = true;
+            hasDisabled = !gameObject.activeSelf;
+        }
         
         public void SetProcedure(int index)
         {
-            if(!_init) return;
-            
-            if (index >= procedures.Count || index < 0)
-            {
-                Debug.LogError("index is out of range.");
-                return;
-            }
-            _newProcedureIndex = index;
-            _dirty = true;
+            EvaluateAndSetCurrentProcedure(index);
         }
 
         public void NextProcedure()
         {
-            SetProcedure(_currentProcedureIndex + 1);
+            EvaluateAndSetCurrentProcedure(_currentProcedureIndex + 1);
         }
 
         public void PreviousProcedure()
         {
-            SetProcedure(_currentProcedureIndex - 1);
+            EvaluateAndSetCurrentProcedure(_currentProcedureIndex - 1);
         }
 
-        private void Awake()
+        private void OnEnable()
         {
-            Init();
-            
-            for (var i = 0; i < procedures.Count; i++)
-            {
-                var procedure = procedures[i];
-                if (i == startProcedureIndex)
-                {
-                    procedure.Init();
-                }
-                else
-                {
-                    procedure.Release();
-                }
-            }
-        }
-
-        private void Start()
-        {
-            if(!_init) return;
-            
-            procedures[_currentProcedureIndex].OnBegin();
+            if(!hasDisabled) return;
+            Running = disableStateCache;
         }
 
         private void Update()
         {
-            if(!_init) return;
-            
+            if(!Running) return;
             var procedure = procedures[_currentProcedureIndex];
             
-            if (_dirty)
-            {
-                _dirty = false;
-                SetCurrentProcedure(_newProcedureIndex);
-            }
-            else if (!procedure.IsCompleted)
+            if (!procedure.IsCompleted)
             {
                 procedure.OnUpdate();
             }
             else if (procedure.IsBack)
             {
-                SetCurrentProcedure(_currentProcedureIndex - 1);
+                if (_currentProcedureIndex - 1 < 0)
+                {
+                    End();
+                }
+                else
+                {
+                    SetCurrentProcedure(_currentProcedureIndex - 1);
+                }
             }
             else
             {
-                SetCurrentProcedure(_currentProcedureIndex + 1);
+                if (_currentProcedureIndex + 1 >= procedures.Count)
+                {
+                    End();
+                }
+                else
+                {
+                    SetCurrentProcedure(_currentProcedureIndex + 1);
+                }
             }
         }
 
-        private void Init()
+        private void OnDisable()
         {
-            _init = false;
-            
-            if (procedures == null || procedures.Count == 0)
-            {
-                Debug.LogError("No procedures or procedures count is zero.");
-                return;
-            }
+            disableStateCache = Running;
+            Running = false;
+            hasDisabled = true;
+        }
 
-            if (startProcedureIndex >= procedures.Count || startProcedureIndex < 0)
+        private void EvaluateAndSetCurrentProcedure(int index)
+        {
+            if (index >= procedures.Count || index < 0) throw new ArgumentOutOfRangeException(nameof(index), index, "Index is out of range.");
+            SetCurrentProcedure(index);
+        }
+        
+        /// <summary>
+        /// 初始化所有<see cref="Procedure"/>
+        /// </summary>
+        private void InitializeAllProcedure()
+        {
+            foreach (var procedure in procedures)
             {
-                Debug.LogError("StartProcedureIndex out of range.");
-                return;
+                procedure.Init();
             }
             
             _init = true;
+            Debug.Log("ProcedureController : All Procedure are initialized.");
         }
         
+        /// <summary>
+        /// 释放所有<see cref="Procedure"/>
+        /// </summary>
+        private void ReleaseAllProcedure()
+        {
+            foreach (var procedure in procedures)
+            {
+                procedure.Release();
+            }
+            _init = false;
+            Debug.Log("ProcedureController : All procedure are released.");
+        }
+        
+        /// <summary>
+        /// 设置当前<see cref="Procedure"/>
+        /// </summary>
         private void SetCurrentProcedure(int index)
         {
-            if (index >= procedures.Count || index < 0)
-            {
-                Debug.Log("No more procedure.");
-                return;
-            }
+            var procedure = procedures[_currentProcedureIndex];
             procedures[_currentProcedureIndex].OnEnd();
-            procedures[_currentProcedureIndex].Release();
             _currentProcedureIndex = index;
-            procedures[_currentProcedureIndex].Init();
             procedures[_currentProcedureIndex].OnBegin();
+            LogCurrentProcedure();
+        }
+
+        private void BeginStartProcedure()
+        {
+            if (startProcedureIndex < 0 || startProcedureIndex >= procedures.Count)
+            {
+                Debug.LogError("Start Procedure Index is out of range.");
+            }
+            
+            _currentProcedureIndex = startProcedureIndex;
+            procedures[_currentProcedureIndex].OnBegin();
+            LogCurrentProcedure();
+        }
+
+        private void End()
+        {
+            Running = false;
+            procedures[_currentProcedureIndex].OnEnd();
+            _currentProcedureIndex = -1;
+            Debug.Log("ProcedureController : All procedure are completed.");
+        }
+
+        private void LogCurrentProcedure()
+        {
+            Debug.Log($"ProcedureController current procedure : {procedures[_currentProcedureIndex].name} [{procedures[_currentProcedureIndex].GetType().Name}]");
         }
     }
 }

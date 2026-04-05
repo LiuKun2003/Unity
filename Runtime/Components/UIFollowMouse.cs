@@ -6,10 +6,10 @@ namespace LK.Runtime.Components
     /// <summary>
     /// UI跟随鼠标组件
     /// </summary>
-    [AddComponentMenu("UI/Effects/UIFollowTarget", 85)]
+    [AddComponentMenu("UI/Effects/UIFollowMouse", 85)]
     public class UIFollowMouse : UIBehaviour
     {
-        [SerializeField] private float smoothSpeed;
+        [SerializeField] private float smoothSpeed = 0.1f;
         [SerializeField] private Vector2 offset;
 
         private DrivenRectTransformTracker _tracker;
@@ -49,7 +49,7 @@ namespace LK.Runtime.Components
             _tracker.Add(this, _rectTransform, DrivenTransformProperties.AnchoredPosition3D);
             
             var endPoint = CalculateEndPoint();
-            var smoothTime = 1f / smoothSpeed; // 转换为平滑时间
+            var smoothTime = smoothSpeed; // 转换为平滑时间
             _rectTransform.position = Vector3.SmoothDamp(
                 _rectTransform.position,
                 endPoint,

@@ -79,9 +79,9 @@ namespace LK.Runtime.Components
             {
                 TurnBehavior.None => true,
                 TurnBehavior.Previous => pageIndex > 0,
-                TurnBehavior.Next => pageIndex < multiPage.PagesCount - 1,
+                TurnBehavior.Next => pageIndex < multiPage.Pages.Count - 1,
                 TurnBehavior.First => pageIndex != 0,
-                TurnBehavior.Trailer => pageIndex != multiPage.PagesCount - 1,
+                TurnBehavior.Trailer => pageIndex != multiPage.Pages.Count - 1,
                 TurnBehavior.Specific => pageIndex != specific,
                 _ => false
             };

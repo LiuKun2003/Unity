@@ -73,6 +73,15 @@ namespace LK.Runtime.Utilities
             
             return result;
         }
+
+        public float ClampAngle(float value)
+        {
+            while (Mathf.Abs(value) > 180f)
+            {
+                value += value < 0f ? 360f : -360f;
+            }
+            return Clamp(value);
+        }
         
         private static void CheckValidity(float lower, float upper)
         {
