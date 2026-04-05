@@ -11,7 +11,7 @@ namespace LK.Editor
     public class Button3DEditor : UnityEditor.Editor
     {
         private SerializedProperty _interactable, _transition;
-        private SerializedProperty _root, _ignoreChildren, _normalMaterials, _highlightedMaterials, _pressedMaterials, _disabledMaterials;
+        private SerializedProperty _root, _ignoreChildren, _normalMaterials, _highlightedMaterials, _pressedMaterials, _selectedMaterials, _disabledMaterials;
         private SerializedProperty _normal, _highlighted, _pressed, _disabled;
         
         private bool _showEvents;
@@ -29,6 +29,7 @@ namespace LK.Editor
             _normalMaterials = serializedObject.FindProperty("normalMaterials");
             _highlightedMaterials = serializedObject.FindProperty("highlightedMaterials");
             _pressedMaterials = serializedObject.FindProperty("pressedMaterials");
+            _selectedMaterials  = serializedObject.FindProperty("selectedMaterials");
             _disabledMaterials = serializedObject.FindProperty("disabledMaterials");
             
             _normal = serializedObject.FindProperty("normal");
@@ -50,6 +51,7 @@ namespace LK.Editor
                 _normal.propertyPath,
                 _highlighted.propertyPath,
                 _pressed.propertyPath,
+                _selectedMaterials.propertyPath,
                 _disabled.propertyPath
             };
         }
@@ -58,11 +60,11 @@ namespace LK.Editor
         { 
             EditorGUILayout.PropertyField(_interactable);
             
-            switch (DrawEnumProperty<Selectable3D.Transition>(_transition))
+            switch (DrawEnumProperty<Selectable3D.TransitionMode>(_transition))
             {
-                case Selectable3D.Transition.None:
+                case Selectable3D.TransitionMode.None:
                     break;
-                case Selectable3D.Transition.MaterialsSwap:
+                case Selectable3D.TransitionMode.MaterialsSwap:
                     EditorGUI.indentLevel++;
                     EditorGUILayout.PropertyField(_root);
                     if (_root.objectReferenceValue == null)
@@ -73,10 +75,11 @@ namespace LK.Editor
                     EditorGUILayout.PropertyField(_normalMaterials);
                     EditorGUILayout.PropertyField(_highlightedMaterials);
                     EditorGUILayout.PropertyField(_pressedMaterials);
+                    EditorGUILayout.PropertyField(_selectedMaterials);
                     EditorGUILayout.PropertyField(_disabledMaterials);
                     EditorGUI.indentLevel--;
                     break;
-                case Selectable3D.Transition.Event:
+                case Selectable3D.TransitionMode.Event:
                     _showEvents = EditorGUILayout.BeginFoldoutHeaderGroup(_showEvents, "Events");
                     if (_showEvents)
                     {
