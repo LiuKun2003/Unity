@@ -8,11 +8,14 @@ namespace LK.Editor
 {
     [CustomEditor(typeof(Selectable3D), true)]
     [CanEditMultipleObjects]
-    public class Button3DEditor : UnityEditor.Editor
+    public class Selectable3DEditor : UnityEditor.Editor
     {
-        private SerializedProperty _interactable, _transition;
-        private SerializedProperty _root, _ignoreChildren, _normalMaterials, _highlightedMaterials, _pressedMaterials, _selectedMaterials, _disabledMaterials;
-        private SerializedProperty _normal, _highlighted, _pressed, _disabled;
+        private SerializedProperty _interactableProperty;
+        private SerializedProperty _transitionModeProperty;
+        private SerializedProperty _targetRendererProperty;
+        private SerializedProperty _ignoreChildrenProperty;
+        private SerializedProperty _materialsBlockProperty;
+        private SerializedProperty _eventStateProperty;
         
         private bool _showEvents;
         
@@ -21,94 +24,81 @@ namespace LK.Editor
         private void OnEnable()
         {
             var script = serializedObject.FindProperty("m_Script");
-            _interactable = serializedObject.FindProperty("interactable");
-            _transition = serializedObject.FindProperty("transition");
+            _interactableProperty = serializedObject.FindProperty("interactable");
+            _transitionModeProperty = serializedObject.FindProperty("transitionMode");
             
-            _root = serializedObject.FindProperty("root");
-            _ignoreChildren = serializedObject.FindProperty("ignoreChildren");
-            _normalMaterials = serializedObject.FindProperty("normalMaterials");
-            _highlightedMaterials = serializedObject.FindProperty("highlightedMaterials");
-            _pressedMaterials = serializedObject.FindProperty("pressedMaterials");
-            _selectedMaterials  = serializedObject.FindProperty("selectedMaterials");
-            _disabledMaterials = serializedObject.FindProperty("disabledMaterials");
+            _targetRendererProperty = serializedObject.FindProperty("targetRenderer");
+            _ignoreChildrenProperty = serializedObject.FindProperty("ignoreChildren");
+            _materialsBlockProperty = serializedObject.FindProperty("materialsBlock");
             
-            _normal = serializedObject.FindProperty("normal");
-            _highlighted = serializedObject.FindProperty("highlighted");
-            _pressed = serializedObject.FindProperty("pressed");
-            _disabled = serializedObject.FindProperty("disabled");
+            _eventStateProperty = serializedObject.FindProperty("stateEvents");
             
             _propertyPathToExcludeForChildClasses = new[]
             {
                 script.propertyPath,
-                _interactable.propertyPath,
-                _transition.propertyPath,
-                _root.propertyPath,
-                _ignoreChildren.propertyPath,
-                _normalMaterials.propertyPath,
-                _highlightedMaterials.propertyPath,
-                _pressedMaterials.propertyPath,
-                _disabledMaterials.propertyPath,
-                _normal.propertyPath,
-                _highlighted.propertyPath,
-                _pressed.propertyPath,
-                _selectedMaterials.propertyPath,
-                _disabled.propertyPath
+                _interactableProperty.propertyPath,
+                _transitionModeProperty.propertyPath,
+                _targetRendererProperty.propertyPath,
+                _ignoreChildrenProperty.propertyPath,
+                _materialsBlockProperty.propertyPath,
+                _eventStateProperty.propertyPath,
             };
         }
         
         public override void OnInspectorGUI()
         { 
-            EditorGUILayout.PropertyField(_interactable);
+            serializedObject.Update();
             
-            switch (DrawEnumProperty<Selectable3D.TransitionMode>(_transition))
+            EditorGUILayout.PropertyField(_interactableProperty);
+            EditorGUILayout.PropertyField(_transitionModeProperty);
+            var transitionMode = (Selectable3D.TransitionMode)_transitionModeProperty.enumValueIndex;
+            ++EditorGUI.indentLevel;
             {
-                case Selectable3D.TransitionMode.None:
-                    break;
-                case Selectable3D.TransitionMode.MaterialsSwap:
-                    EditorGUI.indentLevel++;
-                    EditorGUILayout.PropertyField(_root);
-                    if (_root.objectReferenceValue == null)
-                    {
-                        EditorGUILayout.HelpBox("You must have a Transform root in order to use a materials swap transition.", MessageType.Warning);
-                    }
-                    EditorGUILayout.PropertyField(_ignoreChildren);
-                    EditorGUILayout.PropertyField(_normalMaterials);
-                    EditorGUILayout.PropertyField(_highlightedMaterials);
-                    EditorGUILayout.PropertyField(_pressedMaterials);
-                    EditorGUILayout.PropertyField(_selectedMaterials);
-                    EditorGUILayout.PropertyField(_disabledMaterials);
-                    EditorGUI.indentLevel--;
-                    break;
-                case Selectable3D.TransitionMode.Event:
-                    _showEvents = EditorGUILayout.BeginFoldoutHeaderGroup(_showEvents, "Events");
-                    if (_showEvents)
-                    {
-                        EditorGUI.indentLevel++;
-                        EditorGUILayout.PropertyField(_normal);
-                        EditorGUILayout.PropertyField(_highlighted);
-                        EditorGUILayout.PropertyField(_pressed);
-                        EditorGUILayout.PropertyField(_disabled);
-                        EditorGUI.indentLevel--;
-                    }
-                    EditorGUILayout.EndFoldoutHeaderGroup();
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
+                switch (transitionMode)
+                {
+                    case Selectable3D.TransitionMode.None:
+                        break;
+                    case Selectable3D.TransitionMode.MaterialsSwap:
+                        EditorGUILayout.PropertyField(_targetRendererProperty);
+                        if (_targetRendererProperty.objectReferenceValue == null)
+                        {
+                            EditorGUILayout.HelpBox(
+                                "You must have a Transform root in order to use a materials swap transition.",
+                                MessageType.Warning);
+                        }
+
+                        EditorGUILayout.PropertyField(_ignoreChildrenProperty);
+                        EditorGUILayout.PropertyField(_materialsBlockProperty);
+                        break;
+                    case Selectable3D.TransitionMode.Event:
+                        _showEvents = EditorGUILayout.Foldout(_showEvents, "State Events");
+                        if (_showEvents)
+                        {
+                            EditorGUILayout.PropertyField(_eventStateProperty);
+                        }
+
+                        EditorGUILayout.EndFoldoutHeaderGroup();
+                        break;
+                }
             }
-            EditorGUILayout.Space(10);
-            
-            DrawPropertiesExcluding(serializedObject, _propertyPathToExcludeForChildClasses);
+            --EditorGUI.indentLevel;
+
+            ChildClassPropertiesGUI();
             
             serializedObject.ApplyModifiedProperties();
-            EditorUtility.SetDirty(target);
         }
-        
-        private static T DrawEnumProperty<T>(SerializedProperty property, params GUILayoutOption[] options) where T : Enum
+
+        private void ChildClassPropertiesGUI()
         {
-            var selected = (T)Enum.ToObject(typeof(T), property.intValue);
-            var newValue = (T)EditorGUILayout.EnumPopup(property.displayName, selected, options);
-            property.intValue = Convert.ToInt32(newValue);
-            return newValue;
+            if (IsDerivedSelectableEditor())
+                return;
+
+            DrawPropertiesExcluding(serializedObject, _propertyPathToExcludeForChildClasses);
+        }
+
+        private bool IsDerivedSelectableEditor()
+        {
+            return GetType() != typeof(Selectable3DEditor);
         }
     }
 }

@@ -15,7 +15,7 @@ namespace LK.Runtime.Components
 
         private void OnMouseUpAsButton()
         {
-            //if(!isActiveAndEnabled || !Interactable) return;
+            if(!isActiveAndEnabled || !Interactable) return;
             
             OnClick?.Invoke();
         }

@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
+using UnityEngine.UI;
 
 namespace LK.Runtime.Utilities
 {
@@ -29,13 +30,15 @@ namespace LK.Runtime.Utilities
         }
         
         [SerializeField] private bool interactable = true;
-        [SerializeField] private TransitionMode transition = TransitionMode.MaterialsSwap;
+        [FormerlySerializedAs("transition")] 
+        [SerializeField] 
+        private TransitionMode transitionMode = TransitionMode.MaterialsSwap;
         
         [SerializeField] private Transform targetRenderer;
         [SerializeField] private bool ignoreChildren;
         [SerializeField] private MaterialsBlock  materialsBlock;
         
-        [SerializeField] private EventState eventState;
+        [SerializeField] private StateEvents stateEvents;
         
         protected static Selectable3D[] Selectables = new Selectable3D[10];
         protected static int SelectableCount;
@@ -60,10 +63,10 @@ namespace LK.Runtime.Utilities
         
         public TransitionMode Transition
         {
-            get => transition;
+            get => transitionMode;
             set
             {
-                if (SetStruct(ref transition, value)) OnSetProperty(); 
+                if (SetStruct(ref transitionMode, value)) OnSetProperty(); 
             }
         }
 
@@ -72,7 +75,7 @@ namespace LK.Runtime.Utilities
             get => targetRenderer;
             set
             {
-                if (!SetReference(ref targetRenderer, value)) return;
+                if (!SetPropertyUtility.SetClass(ref targetRenderer, value)) return;
                 InstantClearState();
                 OnSetProperty();
             }
@@ -83,7 +86,7 @@ namespace LK.Runtime.Utilities
             get => ignoreChildren;
             set
             {
-                if (!SetStruct(ref ignoreChildren, value)) return;
+                if (!SetPropertyUtility.SetStruct(ref ignoreChildren, value)) return;
                 InstantClearState();
                 OnSetProperty();
             }
@@ -94,16 +97,16 @@ namespace LK.Runtime.Utilities
             get => materialsBlock;
             set
             {
-                if (SetStruct(ref materialsBlock, value)) OnSetProperty();
+                if (SetPropertyUtility.SetStruct(ref materialsBlock, value)) OnSetProperty();
             }
         }
         
-        public EventState EventState
+        public StateEvents StateEvents
         {
-            get => eventState;
+            get => stateEvents;
             set
             {
-                if(SetStruct(ref eventState, value)) OnSetProperty();
+                if(SetPropertyUtility.SetStruct(ref stateEvents, value)) OnSetProperty();
             }
         }
 
@@ -112,7 +115,7 @@ namespace LK.Runtime.Utilities
             get => interactable;
             set
             {
-                if (!SetStruct(ref interactable, value)) return;
+                if (!SetPropertyUtility.SetStruct(ref interactable, value)) return;
                 if (!interactable && EventSystem.current != null && EventSystem.current.currentSelectedGameObject == gameObject)
                     EventSystem.current.SetSelectedGameObject(null);
                 OnSetProperty();
@@ -300,23 +303,23 @@ namespace LK.Runtime.Utilities
             {
                 case SelectionState.Normal:
                     materials = materialsBlock.NormalMaterials;
-                    unityEvent = eventState.Normal;
+                    unityEvent = stateEvents.Normal;
                     break;
                 case SelectionState.Highlighted:
                     materials = materialsBlock.HighlightedMaterials;
-                    unityEvent = eventState.Highlighted;
+                    unityEvent = stateEvents.Highlighted;
                     break;
                 case SelectionState.Pressed:
                     materials = materialsBlock.PressedMaterials;
-                    unityEvent = eventState.Pressed;
+                    unityEvent = stateEvents.Pressed;
                     break;
                 case SelectionState.Selected:
                     materials  = materialsBlock.SelectedMaterials;
-                    unityEvent = eventState.Selected;
+                    unityEvent = stateEvents.Selected;
                     break;
                 case SelectionState.Disabled:
                     materials = materialsBlock.DisabledMaterials;
-                    unityEvent = eventState.Disabled;
+                    unityEvent = stateEvents.Disabled;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(state), state, null);
@@ -393,7 +396,7 @@ namespace LK.Runtime.Utilities
             var meshRenderers = ignoreChildren ? root.GetComponents<MeshRenderer>() : root.GetComponentsInChildren<MeshRenderer>();
             foreach (var meshRenderer in meshRenderers)
             {
-                var original = meshRenderer.materials;
+                var original = meshRenderer.sharedMaterials;
                 var newMaterials = original.Except(materialsBlock.MaterialsUnion).Union(materials).ToArray();
                 meshRenderer.materials = newMaterials;
             }
@@ -410,7 +413,7 @@ namespace LK.Runtime.Utilities
 
         private static bool SetReference<T>(ref T currentValue, T newValue) where T : class
         {
-            if (EqualityComparer<T>.Default.Equals(currentValue, newValue))
+            if ((currentValue == null && newValue == null) || (currentValue != null && currentValue.Equals(newValue)))
                 return false;
             
             currentValue = newValue;
