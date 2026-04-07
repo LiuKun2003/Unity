@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -11,7 +12,39 @@ public struct MaterialsBlock : IEquatable<MaterialsBlock>
     [field: SerializeField] public Material[] SelectedMaterials { get; set; }
     [field: SerializeField] public Material[] DisabledMaterials { get; set; }
 
-    public Material[] MaterialsUnion => NormalMaterials.Union(HighlightedMaterials).Union(PressedMaterials).Union(SelectedMaterials).Union(DisabledMaterials).ToArray();
+    public Material[] MaterialsUnion
+    {
+        get
+        {
+            IEnumerable<Material> union = Array.Empty<Material>();
+            if (NormalMaterials != null)
+            {
+                union = union.Union(NormalMaterials);
+            }
+
+            if (HighlightedMaterials != null)
+            {
+                union = union.Union(HighlightedMaterials);
+            }
+
+            if (PressedMaterials != null)
+            {
+                union = union.Union(PressedMaterials);
+            }
+
+            if (SelectedMaterials != null)
+            {
+                union = union.Union(SelectedMaterials);
+            }
+
+            if (DisabledMaterials != null)
+            {
+                union = union.Union(DisabledMaterials);
+            }
+            
+            return union.Where(m => m != null).ToArray();
+        }
+    }
 
     public bool Equals(MaterialsBlock other)
     {

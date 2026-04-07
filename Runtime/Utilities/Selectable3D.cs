@@ -330,7 +330,7 @@ namespace LK.Runtime.Utilities
                 case TransitionMode.None:
                     break;
                 case TransitionMode.MaterialsSwap:
-                    DoMaterialsSwap(materials);
+                    DoMaterialsSwap(materials ?? Array.Empty<Material>());
                     break;
                 case TransitionMode.Event:
                     unityEvent.Invoke();
@@ -397,7 +397,7 @@ namespace LK.Runtime.Utilities
             foreach (var meshRenderer in meshRenderers)
             {
                 var original = meshRenderer.sharedMaterials;
-                var newMaterials = original.Except(materialsBlock.MaterialsUnion).Union(materials).ToArray();
+                var newMaterials = original.Except(materialsBlock.MaterialsUnion).Union(materials.Where(m => m != null)).ToArray();
                 meshRenderer.materials = newMaterials;
             }
         }
