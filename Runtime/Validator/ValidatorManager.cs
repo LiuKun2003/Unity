@@ -17,7 +17,7 @@ namespace LK.Runtime.Validator
         {
             foreach (var validator in validators)
             {
-                yield return StartCoroutine(validator.Verify());
+                yield return validator.Verify();
                 if (validator.Result) continue;
                 onFailure?.Invoke();
                 yield break;
