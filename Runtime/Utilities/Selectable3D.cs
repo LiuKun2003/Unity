@@ -287,6 +287,8 @@ namespace LK.Runtime.Utilities
                 case TransitionMode.None:
                 case TransitionMode.Event:
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(Transition), Transition, null);
             }
         }
         
@@ -396,9 +398,7 @@ namespace LK.Runtime.Utilities
             var meshRenderers = ignoreChildren ? root.GetComponents<MeshRenderer>() : root.GetComponentsInChildren<MeshRenderer>();
             foreach (var meshRenderer in meshRenderers)
             {
-                var original = meshRenderer.sharedMaterials;
-                var newMaterials = original.Except(materialsBlock.MaterialsUnion).Union(materials.Where(m => m != null)).ToArray();
-                meshRenderer.materials = newMaterials;
+                meshRenderer.materials = materials;
             }
         }
         
