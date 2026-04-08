@@ -2,13 +2,13 @@ using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
+using LK.Runtime.Utilities;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
-using UnityEngine.UI;
 
-namespace LK.Runtime.Utilities
+namespace LK.Runtime.Components
 {
     [RequireComponent(typeof(Collider))]
     public class Selectable3D : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPointerEnterHandler, IPointerExitHandler, ISelectHandler, IDeselectHandler
@@ -42,6 +42,7 @@ namespace LK.Runtime.Utilities
         
         protected static Selectable3D[] Selectables = new Selectable3D[10];
         protected static int SelectableCount;
+        private readonly List<Material> _lastAddedMaterials = new List<Material>();
         protected int CurrentIndex = -1; 
         private bool _enableCalled;
         
@@ -287,6 +288,8 @@ namespace LK.Runtime.Utilities
                 case TransitionMode.None:
                 case TransitionMode.Event:
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(Transition), Transition, null);
             }
         }
         
@@ -393,12 +396,16 @@ namespace LK.Runtime.Utilities
         {
             var root = targetRenderer;
             if(root == null) return;
+            var newAddMaterials = materials.Where(m => m != null).ToArray();
             var meshRenderers = ignoreChildren ? root.GetComponents<MeshRenderer>() : root.GetComponentsInChildren<MeshRenderer>();
             foreach (var meshRenderer in meshRenderers)
             {
-                var original = meshRenderer.sharedMaterials;
-                var newMaterials = original.Except(materialsBlock.MaterialsUnion).Union(materials.Where(m => m != null)).ToArray();
-                meshRenderer.materials = newMaterials;
+                var newMaterials = meshRenderer.sharedMaterials.ToList();
+                newMaterials = newMaterials.Except(_lastAddedMaterials).ToList();
+                newMaterials.AddRange(newAddMaterials);
+                meshRenderer.materials = newMaterials.ToArray();
+                _lastAddedMaterials.Clear();
+                _lastAddedMaterials.AddRange(materials);
             }
         }
         
