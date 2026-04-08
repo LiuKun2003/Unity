@@ -1,23 +1,67 @@
 using System;
-using System.Buffers;
-using System.Linq;
-using LK.Runtime.Utilities;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.EventSystems;
+
 
 namespace LK.Runtime.Components
 {
     [RequireComponent(typeof(Collider))]
-    public class Button3D : Selectable3D
+    public class Button3D : Selectable3D, IPointerClickHandler, ISubmitHandler
     {
-        [field: SerializeField]
-        public UnityEvent OnClick { get; set; }
+        [Serializable] public class ButtonClickedEvent : UnityEvent {}
+        
+        [SerializeField] private ButtonClickedEvent onClick = new();
 
-        private void OnMouseUpAsButton()
+        protected Button3D() {}
+        
+        public ButtonClickedEvent OnClick
         {
-            if(!isActiveAndEnabled || !Interactable) return;
+            get => onClick;
+            set => onClick = value;
+        }
+        
+        private void Press()
+        {
+            if (!IsActive() || !IsInteractable())
+                return;
+
+            UISystemProfilerApi.AddMarker("Button3D.OnClick", this);
+            onClick.Invoke();
+        }
+
+        public virtual void OnPointerClick(PointerEventData eventData)
+        {
+            if (eventData.button != PointerEventData.InputButton.Left)
+                return;
+
+            Press();
+        }
+
+        public virtual void OnSubmit(BaseEventData eventData)
+        {
+            Press();
             
-            OnClick?.Invoke();
+            if (!IsActive() || !IsInteractable())
+                return;
+
+            DoStateTransition(SelectionState.Pressed);
+            StartCoroutine(OnFinishSubmit());
+        }
+        
+        private IEnumerator OnFinishSubmit()
+        {
+            const float fadeTime = 0.1f;
+            var elapsedTime = 0f;
+
+            while (elapsedTime < fadeTime)
+            {
+                elapsedTime += Time.unscaledDeltaTime;
+                yield return null;
+            }
+
+            DoStateTransition(CurrentSelectionState);
         }
     }
 }
