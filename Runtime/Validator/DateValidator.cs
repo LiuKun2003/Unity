@@ -10,6 +10,7 @@ namespace LK.Runtime.Validator
     public class DateValidator : Validator
     {
         [SerializeField] private SerializableDateTime expirationDate;
+        [SerializeField] private int webRequestTimeout = 5;
         [SerializeField] private string lastDateTimeKey = "LAST_DATETIME_KEY";
         
         
@@ -18,7 +19,7 @@ namespace LK.Runtime.Validator
         public override IEnumerator Verify()
         {
             using var webRequest = UnityWebRequest.Get("https://quan.suning.com/getSysTime.do");
-            webRequest.timeout = 5;
+            webRequest.timeout = webRequestTimeout;
             yield return webRequest.SendWebRequest();
 
             var now = DateTime.Now;
