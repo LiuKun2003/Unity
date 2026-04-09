@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Globalization;
 using LK.Runtime.Utilities;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -18,20 +19,21 @@ namespace LK.Runtime.Validator
         
         public override IEnumerator Verify()
         {
-            using var webRequest = UnityWebRequest.Get("https://quan.suning.com/getSysTime.do");
-            webRequest.timeout = webRequestTimeout;
-            yield return webRequest.SendWebRequest();
-
             var now = DateTime.Now;
             
-#if UNITY_EDITOR
             if (PlayerPrefs.HasKey(lastDateTimeKey))
             {
                 var lastDateTime = DateTime.Parse(PlayerPrefs.GetString(lastDateTimeKey));
-                if (lastDateTime > now) yield break;
+                if (lastDateTime > now)
+                {
+                    Result = false;
+                    yield break;
+                }
             }
-#endif
             
+            using var webRequest = UnityWebRequest.Get("https://quan.suning.com/getSysTime.do");
+            webRequest.timeout = webRequestTimeout;
+            yield return webRequest.SendWebRequest();
             if (webRequest.result == UnityWebRequest.Result.Success)
             {
                 // 返回格式: {"sysTime2":"2023-10-27 10:00:00","sysTime1":"20231027100000"}
@@ -41,6 +43,7 @@ namespace LK.Runtime.Validator
                 now = DateTime.Parse(datetimeStr);
             }
         
+            PlayerPrefs.SetString(lastDateTimeKey, now.ToString(CultureInfo.CurrentCulture));
             Result = now < expirationDate;
         }
 
