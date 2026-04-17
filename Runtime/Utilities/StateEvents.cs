@@ -29,7 +29,16 @@ namespace LK.Runtime.Utilities
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Normal, Highlighted, Pressed, Selected, Disabled);
+            unchecked
+            {
+                var hash = 17;
+                hash = hash * 23 + Normal.GetHashCode();
+                hash = hash * 23 + Highlighted.GetHashCode();
+                hash = hash * 23 + Pressed.GetHashCode();
+                hash = hash * 23 + Selected.GetHashCode();
+                hash = hash * 23 + Disabled.GetHashCode();
+                return hash;
+            }
         }
     }
 }

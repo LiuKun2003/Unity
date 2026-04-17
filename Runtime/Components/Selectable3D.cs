@@ -1,5 +1,4 @@
 using System;
-using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
 using LK.Runtime.Utilities;
@@ -389,7 +388,7 @@ namespace LK.Runtime.Components
             minimumLength = Math.Max(minimumLength, materialsBlock.PressedMaterials.Length);
             minimumLength = Math.Max(minimumLength, materialsBlock.DisabledMaterials.Length);
             minimumLength = Math.Max(minimumLength, materialsBlock.SelectedMaterials.Length);
-            return ArrayPool<Material>.Shared.Rent(minimumLength);
+            return new Material[minimumLength];
         }
 
         private void DoMaterialsSwap(Material[] materials)

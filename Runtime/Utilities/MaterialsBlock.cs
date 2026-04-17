@@ -28,7 +28,16 @@ namespace LK.Runtime.Utilities
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(NormalMaterials, HighlightedMaterials, PressedMaterials, SelectedMaterials, DisabledMaterials);
+            unchecked
+            {
+                var hash = 17;
+                hash = hash * 23 + NormalMaterials.GetHashCode();
+                hash = hash * 23 + HighlightedMaterials.GetHashCode();
+                hash = hash * 23 + PressedMaterials.GetHashCode();
+                hash = hash * 23 + SelectedMaterials.GetHashCode();
+                hash = hash * 23 + DisabledMaterials.GetHashCode();
+                return hash;
+            }
         }
     }
 }

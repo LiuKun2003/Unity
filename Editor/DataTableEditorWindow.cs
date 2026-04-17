@@ -23,9 +23,9 @@ namespace LK.Editor
         private DataTable dataTable;
     
         // 存储插入/删除的行/列
-        private readonly HashSet<int> insertRawSet = new();
-        private readonly HashSet<int> deleteRawSet = new();
-        private readonly HashSet<int> deleteColumnSet = new();
+        private readonly HashSet<int> insertRawSet = new HashSet<int>();
+        private readonly HashSet<int> deleteRawSet = new HashSet<int>();
+        private readonly HashSet<int> deleteColumnSet = new HashSet<int>();
     
         // 滚动视图位置
         private Vector2 scrollPosition;
