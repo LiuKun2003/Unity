@@ -5,7 +5,7 @@ namespace LK.Runtime.Interaction
 {
     public abstract class InputProviderBase : MonoBehaviour
     {
-        protected enum OutMode
+        public enum OutMode
         {
             None,
             Move,
@@ -16,8 +16,8 @@ namespace LK.Runtime.Interaction
         [SerializeField] private TransformableObject target;
         [SerializeField] private OutMode outMode = OutMode.None;
         
-        protected TransformableObject Target => target;
-        protected OutMode Out => outMode;
+        public TransformableObject Target { get => target; set => target = value; }
+        public OutMode Out { get => outMode; set => outMode = value; }
         
 #if UNITY_EDITOR
         protected virtual void Reset()
