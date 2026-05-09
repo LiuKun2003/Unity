@@ -43,7 +43,7 @@ namespace LK.Editor
             // 创建一个临时的Texture2D来存储RenderTexture的内容
             var currentActive = RenderTexture.active;
             RenderTexture.active = rt;
-            var texture = new Texture2D(rt.width, rt.height, TextureFormat.RGBA32, false);
+            var texture = new Texture2D(rt.width, rt.height, TextureFormat.RGBA32, false, linear:false);
             texture.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
             texture.Apply();
 

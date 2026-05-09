@@ -14,7 +14,7 @@ namespace LK.Runtime.Utilities
             {
                 // 如果实例不存在，则查找场景中已存在的实例
                 if (_instance != null) return _instance;
-                _instance = FindFirstObjectByType<T>();
+                _instance = FindObjectOfType<T>();
 
                 // 如果仍然找不到，则创建一个新的实例
                 if (_instance != null) return _instance;

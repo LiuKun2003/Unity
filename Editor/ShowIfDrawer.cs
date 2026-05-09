@@ -25,12 +25,15 @@ namespace LK.Editor
                 : 0f;
         }
 
-        private bool ShouldShow(SerializedProperty property) => 
-            attribute is not ShowIfAttribute attr || 
-            attr.ConditionFieldNames
-                .Select(fieldName => property.propertyPath.Replace(property.name, fieldName))
-                .Select(conditionPath => property.serializedObject.FindProperty(conditionPath))
-                .All(condProp => condProp is { propertyType: SerializedPropertyType.Boolean, boolValue: true });
+        private bool ShouldShow(SerializedProperty property)
+        {
+            ShowIfAttribute attr = attribute as ShowIfAttribute;
+            
+            return attr != null && attr.ConditionFieldNames
+                    .Select(fieldName => property.propertyPath.Replace(property.name, fieldName))
+                    .Select(conditionPath => property.serializedObject.FindProperty(conditionPath))
+                    .All(condProp => condProp is { propertyType: SerializedPropertyType.Boolean, boolValue: true });
+        }
     }
 }
 #endif

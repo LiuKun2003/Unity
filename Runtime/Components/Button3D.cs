@@ -12,7 +12,7 @@ namespace LK.Runtime.Components
     {
         [Serializable] public class ButtonClickedEvent : UnityEvent {}
         
-        [SerializeField] private ButtonClickedEvent onClick = new();
+        [SerializeField] private ButtonClickedEvent onClick = new ButtonClickedEvent();
 
         protected Button3D() {}
         
