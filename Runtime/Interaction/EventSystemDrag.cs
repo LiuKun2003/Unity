@@ -7,7 +7,10 @@ namespace LK.Runtime.Interaction
     {
         [SerializeField] private bool reverseX;
         [SerializeField]  private bool reverseY;
-        
+
+        public bool ReverseX { get => reverseX; set => reverseX = value; }
+        public bool ReverseY { get => reverseY; set => reverseY = value; }
+
         public void OnDrag(PointerEventData eventData)
         {
             var v = new Vector3(eventData.delta.x, eventData.delta.y, 0);

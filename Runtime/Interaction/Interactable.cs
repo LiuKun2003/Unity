@@ -44,7 +44,13 @@ namespace LK.Runtime.Interaction
             get => _targetScale;
             set => _targetScale = value;
         }
-        
+
+        public float RotateSpeed
+        {
+            get => rotateSpeed;
+            set => rotateSpeed = value;
+        }
+
         public override void ProcessMoveInput(Vector3 delta)
         {
             _targetPosition += delta * moveSpeed;
