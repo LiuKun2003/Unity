@@ -58,6 +58,7 @@ namespace LK.Runtime.Components
         public void OnBeginDrag(PointerEventData eventData)
         {
             if (_canvasGroup == null) return;
+            _targetPosition = _rectTransform.anchoredPosition;
             _canvasGroup.blocksRaycasts = false;
             _currentVelocity = Vector2.zero;
             _isDragging = true;
