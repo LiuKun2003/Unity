@@ -22,9 +22,6 @@ namespace LK.Runtime.Utilities
                 _instance = singletonObject.AddComponent<T>();
                 singletonObject.name = typeof(T).ToString();
 
-                // 设置游戏对象为DontDestroyOnLoad，使其在场景切换时不被销毁
-                DontDestroyOnLoad(singletonObject);
-
                 return _instance;
             }
         }
@@ -40,6 +37,8 @@ namespace LK.Runtime.Utilities
             else
             {
                 _instance = this as T;
+                // 设置游戏对象为DontDestroyOnLoad，使其在场景切换时不被销毁
+                DontDestroyOnLoad(gameObject);
             }
         }
 
