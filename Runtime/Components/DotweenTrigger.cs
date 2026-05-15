@@ -3,7 +3,7 @@ using System;
 using DG.Tweening;
 using UnityEngine;
 
-namespace LK.Runtime.Utility
+namespace LK.Runtime.Components
 {
     public class DotweenTrigger : MonoBehaviour
     {

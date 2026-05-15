@@ -1,7 +1,7 @@
 #if DOTWEEN
 #if UNITY_EDITOR
 using System;
-using LK.Runtime.Utility;
+using LK.Runtime.Components;
 using UnityEditor;
 using UnityEditor.AnimatedValues;
 using UnityEngine;

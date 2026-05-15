@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace LK.Runtime.Utility
+namespace LK.Runtime.Components
 {
     [DisallowMultipleComponent]
     public class DotweenTriggerGroup : MonoBehaviour
