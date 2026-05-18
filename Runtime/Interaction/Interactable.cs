@@ -8,7 +8,7 @@ namespace LK.Runtime.Interaction
         [SerializeField] private float moveSpeed = 1f;
         [SerializeField] private float moveSmooth = 0.2f;
 
-        [SerializeField] private float rotateSpeed = 10f;
+        [SerializeField] private float rotateSpeed = 1f;
         [SerializeField] private float rotateSmooth = 0.2f;
 
         [SerializeField] private float scaleSpeed = 1f;
@@ -16,11 +16,11 @@ namespace LK.Runtime.Interaction
         [SerializeField] private RangedFloat scaleRange = new RangedFloat(0.5f, 2f);
 
         private Vector3 _targetPosition;
-        private Vector3 _targetRotation;
+        private Quaternion _targetRotation;
         private Vector3 _targetScale;
 
         private Vector3 _startPosition;
-        private Vector3 _startRotation;
+        private Quaternion _startRotation;
         private Vector3 _startScale;
         private bool _startInfoInitialized;
 
@@ -33,7 +33,7 @@ namespace LK.Runtime.Interaction
             set => _targetPosition = value;
         }
         
-        public Vector3 TargetRotation
+        public Quaternion TargetRotation
         {
             get => _targetRotation;
             set => _targetRotation = value;
@@ -51,19 +51,20 @@ namespace LK.Runtime.Interaction
             set => rotateSpeed = value;
         }
 
-        public override void ProcessMoveInput(Vector3 delta)
+        public override void ProcessMoveInput(Vector3 dir)
         {
-            _targetPosition += delta * moveSpeed;
+            _targetPosition += dir.normalized * moveSpeed;
         }
 
-        public override void ProcessRotateInput(Vector3 delta)
+        public override void ProcessRotateInput(Vector3 dir)
         {
-            _targetRotation += new Vector3(delta.y, delta.x, 0f) * rotateSpeed;
+            Quaternion rotationIncrement = Quaternion.AngleAxis(rotateSpeed, dir.normalized);
+            _targetRotation = rotationIncrement * _targetRotation;
         }
 
-        public override void ProcessScaleInput(Vector3 delta)
+        public override void ProcessScaleInput(Vector3 dir)
         {
-            _targetScale += delta * scaleSpeed;
+            _targetScale += dir.normalized * scaleSpeed;
             _targetScale = ClampScale(_targetScale);
         }
 
@@ -78,7 +79,7 @@ namespace LK.Runtime.Interaction
             if (!smooth)
             {
                 transform.localPosition = _startPosition;
-                transform.localEulerAngles = _startRotation;
+                transform.localRotation = _startRotation;
                 transform.localScale = _startScale;
             }
         }
@@ -86,7 +87,7 @@ namespace LK.Runtime.Interaction
         private void Start()
         {
             _targetPosition = transform.localPosition;
-            _targetRotation = transform.localEulerAngles;
+            _targetRotation = transform.localRotation;
             _targetScale = transform.localScale;
             
             InitializeStartInfo();
@@ -101,7 +102,7 @@ namespace LK.Runtime.Interaction
         {
             if(_startInfoInitialized) return;
             _startPosition = transform.localPosition;
-            _startRotation = transform.localEulerAngles;
+            _startRotation = transform.localRotation;
             _startScale = transform.localScale;
             _startInfoInitialized = true;
         }
@@ -112,9 +113,8 @@ namespace LK.Runtime.Interaction
             transform.localPosition = Vector3.SmoothDamp(transform.localPosition, _targetPosition, ref _positionVelocity, moveSmooth);
 
             // 对齐旋转
-            var targetQuaternion = Quaternion.Euler(_targetRotation);
-            var rotationStep = Quaternion.Angle(transform.localRotation, targetQuaternion) * Time.deltaTime / rotateSmooth;
-            transform.localRotation = Quaternion.RotateTowards(transform.localRotation, targetQuaternion, rotationStep);
+            var rotationStep = Quaternion.Angle(transform.localRotation, _targetRotation) * Time.deltaTime / rotateSmooth;
+            transform.localRotation = Quaternion.RotateTowards(transform.localRotation, _targetRotation, rotationStep);
 
             // 对齐缩放
             transform.localScale = Vector3.SmoothDamp(transform.localScale, _targetScale, ref _scaleVelocity, scaleSmooth);
